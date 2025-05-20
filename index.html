@@ -195,6 +195,17 @@
       <li><a href="#contacto">Contacto</a></li>
     </ul>
   </nav>
+  <script>
+    window.addEventListener('scroll', function() {
+      const nav = document.getElementById('mainNav');
+      if (window.scrollY > 0) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
   <header id="inicio">
     <div style="text-align: center; margin-top: 20px;">
   <img src="Logo GECA.png" alt="Logo GECA" style="max-width: 200px; height: auto;">
