@@ -152,43 +152,96 @@
     margin: 0;
   }
 
+  /* Estilos del nav principal */
   nav {
-    position: fixed; /* Para que esté siempre visible */
+    position: fixed;
     top: 0;
     width: 100%;
-    background-color: #ffffff; /* color de fondo sólido inicialmente */
-    padding: 10px 0;
-    transition: background-color 0.3s ease;
+    background-color: #ffef8f;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     z-index: 999;
+    transition: background-color 0.3s ease;
   }
 
   nav.scrolled {
-    background-color: rgba(255, 136, 143, 1.00); /* transparente al 65% cuando scrolleas */
+    background-color: rgba(255, 239, 143, 0.65);
   }
 
+  /* Estilo para los enlaces del menú */
   nav ul {
     list-style: none;
     display: flex;
-    justify-content: center;
     margin: 0;
     padding: 0;
   }
 
   nav ul li {
-    margin: 0 20px;
+    margin: 0 15px;
   }
 
   nav ul li a {
-    font-size: 12px; /* fuente pequeña */
-    line-height: 1.1;
-    color: #ffef8f; /* letra color */
+    font-size: 10px;
+    color: #ff888f;
     text-decoration: none;
-    font-family: Arial, sans-serif; /* puedes cambiar la fuente si quieres */
+  }
+
+  /* Estilo para el botón de hamburguesa en móvil */
+  .menu-toggle {
+    display: none; /* oculto en pantallas grandes */
+    flex-direction: column;
+    width: 30px;
+    height: 25px;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .menu-toggle span {
+    display: block;
+    height: 3px;
+    background-color: #ff888f;
+    width: 100%;
+    border-radius: 2px;
+  }
+
+  /* Estilos para el menú en modo móvil */
+  @media (max-width: 768px) {
+    nav ul {
+      position: absolute;
+      top: 60px; /* debajo del nav */
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 239, 143, 0.95);
+      flex-direction: column;
+      align-items: center;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    nav ul.open {
+      max-height: 300px; /* lo suficiente para desplegar los items */
+    }
+
+    /* Mostrar botón hamburguesa */
+    .menu-toggle {
+      display: flex;
+    }
   }
 </style>
+
 <body>
   <nav id="mainNav">
-    <ul>
+    <!-- Botón hamburguesa -->
+    <div class="menu-toggle" id="menuToggle" aria-label="Menú" aria-expanded="false" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <!-- Menú -->
+    <ul id="menuItems">
       <li><a href="#inicio">Inicio</a></li>
       <li><a href="#somosgeca">Somos GECA</a></li>
       <li><a href="#talento">Gestión del Talento</a></li>
@@ -196,14 +249,39 @@
       <li><a href="#contacto">Contacto</a></li>
     </ul>
   </nav>
+
+  <!-- Contenido adicional para scroll -->
+  
   <script>
-    window.addEventListener('scroll', function() {
-      const nav = document.getElementById('mainNav');
+    const nav = document.getElementById('mainNav');
+    const menuToggle = document.getElementById('menuToggle');
+    const menuItems = document.getElementById('menuItems');
+
+    // Cambio de fondo al hacer scroll
+    window.addEventListener('scroll', () => {
       if (window.scrollY > 0) {
         nav.classList.add('scrolled');
       } else {
         nav.classList.remove('scrolled');
       }
+    });
+
+    // Función para abrir/cerrar el menú en móvil
+    menuToggle.addEventListener('click', () => {
+      menuItems.classList.toggle('open');
+      // Opcional: cambiar el estado aria
+      const expanded = menuItems.classList.contains('open');
+      menuToggle.setAttribute('aria-expanded', expanded);
+    });
+
+    // Opcional: cerrar el menú al hacer clic en alguna opción
+    document.querySelectorAll('#menuItems a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (menuItems.classList.contains('open')) {
+          menuItems.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', false);
+        }
+      });
     });
   </script>
 </body>
