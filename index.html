@@ -147,7 +147,46 @@
   </style>
 </head>
 <body>
-  <nav>
+  <style>
+  body {
+    margin: 0;
+  }
+
+  nav {
+    position: fixed; /* Para que esté siempre visible */
+    top: 0;
+    width: 100%;
+    background-color: #ffef8f; /* color de fondo sólido inicialmente */
+    padding: 10px 0;
+    transition: background-color 0.3s ease;
+    z-index: 999;
+  }
+
+  nav.scrolled {
+    background-color: rgba(255, 239, 143, 0.65); /* transparente al 65% cuando scrolleas */
+  }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav ul li {
+    margin: 0 15px;
+  }
+
+  nav ul li a {
+    font-size: 10px; /* fuente pequeña */
+    color: #ff888f; /* letra color */
+    text-decoration: none;
+    font-family: Arial, sans-serif; /* puedes cambiar la fuente si quieres */
+  }
+</style>
+<body>
+  <nav id="mainNav">
     <ul>
       <li><a href="#inicio">Inicio</a></li>
       <li><a href="#somosgeca">Somos GECA</a></li>
