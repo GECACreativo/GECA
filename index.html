@@ -90,59 +90,48 @@
       color: #999;
     }
     .section {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-.section-description {
-  text-align: center;
-  margin-bottom: 40px;
+  padding: 20px;
 }
 
 .content-block {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
+  margin: 40px 0;
+  flex-wrap: wrap; /* Para responsive */
 }
 
+/* Para alternar los bloques: invertir en los que llevan "reverse" */
 .content-block.reverse {
   flex-direction: row-reverse;
 }
 
+/* Imagen y texto en columnas */
 .content-block img {
-  width: 100%;
-  max-width: 400px;
+  flex: 1 1 40%;
+  max-width: 40%;
   height: auto;
-  object-fit: cover;
-  flex: 1;
+  margin: 10px;
 }
 
 .text-content {
-  flex: 1;
-  text-align: justify;
+  flex: 1 1 55%;
+  padding: 10px;
 }
 
-@media (max-width: 768px) {
+/* Responsiveness */
+@media(max-width: 768px) {
   .content-block {
     flex-direction: column;
-    text-align: center;
   }
-
   .content-block.reverse {
     flex-direction: column;
   }
-
+  .content-block img,
   .text-content {
-    text-align: justify;
+    flex: 1 1 100%;
+    max-width: 100%;
   }
 }
   </style>
@@ -288,22 +277,22 @@
   <section id="prospectiva" class="section">
   <h2>SOLUCIONES CENTRADAS EN LAS<br>PERSONAS</h2>
   <p class="section-description">
-    Diseñamos soluciones estratégicas centradas en las personas, desde la identificación de oportunidades hasta la implementación sostenible en el tiempo. Así lo hacemos posible:
+    Diseñamos soluciones estratégicas centradas en las personas, desde la identificación de oportunidades hasta la implementación sostenible en el tiempo. <br>Así lo hacemos posible:
   </p>
 
   <div class="content-block">
     <img src="Sección 3_Imagen 1.png" alt="Entendimiento">
     <div class="text-content">
-      <h3>Entendimiento</h3>
+      <h3>ENTENDIMIENTO</h3>
       <p>
         Analizamos a fondo el contexto del negocio, las necesidades reales de los usuarios y los procesos clave. Escuchamos, observamos y formulamos preguntas estratégicas para definir el problema correcto antes de pensar en la solución. En esta etapa realizamos entrevistas, mapas de empatía, y análisis de los procesos actuales para identificar los puntos de fricción en tu operación.
       </p>
     </div>
   </div>
-
+    
   <div class="content-block reverse">
     <div class="text-content">
-      <h3>Diseño de la solución</h3>
+      <h3>DISEÑO DE LA SOLUCIÓN</h3>
       <p>
         Traducimos los hallazgos en una propuesta clara y funcional. Identificamos qué tipo de solución se necesita (tecnológica o no), su alcance y cómo impactará positivamente la experiencia del usuario y los resultados del negocio.
       </p>
@@ -314,7 +303,7 @@
   <div class="content-block">
     <img src="Sección 3_Imagen 3.png" alt="Decisión de plataforma">
     <div class="text-content">
-      <h3>Decisión de plataforma</h3>
+      <h3>DECISIÓN DE PLATAFORMA</h3>
       <p>
         Con base en la solución diseñada, definimos si se requiere una herramienta tecnológica y cuál sería la más adecuada para implementarla. Nuestro criterio combina usabilidad, escalabilidad y alineación con los objetivos estratégicos.
       </p>
@@ -323,7 +312,7 @@
 
   <div class="content-block reverse">
     <div class="text-content">
-      <h3>Prototipado UX/UI básico</h3>
+      <h3>PROTOTIPADO UX/UI BÁSICO</h3>
       <p>
         Creamos un primer modelo visual de la solución, mostrando cómo funcionaría para el usuario. Este prototipo facilita la validación temprana, alinea expectativas y permite ajustes antes de entrar en desarrollo.
       </p>
