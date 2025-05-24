@@ -477,12 +477,60 @@
   <img src="Logo_TASS.png" class="img-hover-effect">
   <img src="Logo-Novili.png" class="img-hover-effect">
 </div>
+
   </section>
   <section id="contacto">
     <h2>HABLEMOS</h2>
     <p>Medellín, Colombia</p>
     <p>+57 300 1834330</p>
     <a href="mailto:comercial@gecacreativo.com">comercial@gecacreativo.com</a></p>
+
+<style>
+  .icon-link {
+    display: inline-block;
+    width: 100px; /* tamaño fijo del círculo */
+    height: 100px;
+    border: 2px solid #ff888f; /* borde del círculo */
+    border-radius: 50%; /* lo convierte en círculo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  /* Para que las imágenes llenen el círculo y sean redondas */
+  .icon-link img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: grayscale(100%);
+    transition: 0.3s;
+  }
+
+  /* Efecto al hacer hover: color en borde y en imagen */
+  .icon-link:hover {
+    border-color: #ff888f;
+  }
+
+  .icon-link:hover img {
+    filter: grayscale(0%);
+  }
+</style>
+
+<div style="display: flex; justify-content: center; gap: 10px;">
+  <a href="https://www.linkedin.com/company/gecacreativo" class="icon-link" target="_blank" rel="noopener noreferrer">
+    <img src="linkedin.png" alt="LinkedIn">
+  </a>
+  <a href="https://wa.me/573001834330" class="icon-link" target="_blank" rel="noopener noreferrer">
+    <img src="whatsapp.png" alt="WhatsApp">
+  </a>
+  <a href="mailto:comercial@gecacreativo.com" class="icon-link" target="_blank" rel="noopener noreferrer">
+    <img src="correo-electronico.png" alt="Email">
+  </a>
+</div>
+    
   </section>
   <footer>
     &copy; 2025 GECA Creativo. Todos los derechos reservados.
