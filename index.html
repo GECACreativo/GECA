@@ -144,6 +144,18 @@
   .text-content {
     text-align: justify;
   }
+  .hubspot-form-wrapper {
+  font-size: 12px !important;
+  transform: scale(0.85); /* opcional para reducir el tamaño general */
+  transform-origin: top left;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.hubspot-form-wrapper * {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
   </style>
 </head>
 <body>
@@ -481,6 +493,7 @@
   </section>
   <section id="contacto">
     <h2>HABLEMOS</h2>
+    <div class="hubspot-form-wrapper">
     <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/v2.js"></script>
 <script>
   hbspt.forms.create({
