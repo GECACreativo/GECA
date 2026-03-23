@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
- 
+
 <!-- ── SEO BÁSICO ── -->
 <title>GECA Creativo &#8212; Consultor&#237;a, Capacitaci&#243;n y Desarrollo Organizacional</title>
 <meta name="description" content="GECA Creativo es un colectivo especializado en consultoría estratégica, capacitación organizacional y desarrollo de talento humano en Medellín, Colombia. Transformamos equipos y organizaciones con impacto real."/>
@@ -11,24 +11,24 @@
 <meta name="author" content="GECA Creativo"/>
 <meta name="robots" content="index, follow"/>
 <link rel="canonical" href="https://www.gecacreativo.com/"/>
- 
-<!-- ── OPEN GRAPH (Facebook, LinkedIn, WhatsApp) ── -->
+
+<!-- ── OPEN GRAPH ── -->
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://www.gecacreativo.com/"/>
 <meta property="og:title" content="GECA Creativo &#8212; Consultor&#237;a, Capacitaci&#243;n y Desarrollo Organizacional"/>
 <meta property="og:description" content="Transformamos ideas en soluciones con impacto. Especialistas en desarrollo de talento humano, liderazgo y consultoría estratégica en Medellín, Colombia."/>
-<meta property="og:image" content="https://www.gecacreativo.com/Logo GECA.png"/>
+<meta property="og:image" content="https://www.gecacreativo.com/Logo%20GECA.png"/>
 <meta property="og:image:alt" content="Logo GECA Creativo"/>
 <meta property="og:locale" content="es_CO"/>
 <meta property="og:site_name" content="GECA Creativo"/>
- 
+
 <!-- ── TWITTER CARD ── -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="GECA Creativo &#8212; Consultor&#237;a y Desarrollo Organizacional"/>
 <meta name="twitter:description" content="Transformamos ideas en soluciones con impacto. Especialistas en talento humano y consultoría estratégica en Medellín, Colombia."/>
-<meta name="twitter:image" content="https://www.gecacreativo.com/Logo GECA.png"/>
- 
-<!-- ── SCHEMA.ORG (datos estructurados para Google) ── -->
+<meta name="twitter:image" content="https://www.gecacreativo.com/Logo%20GECA.png"/>
+
+<!-- ── SCHEMA.ORG ── -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -36,42 +36,32 @@
   "name": "GECA Creativo",
   "description": "Colectivo especializado en consultoría estratégica, capacitación organizacional y desarrollo de talento humano.",
   "url": "https://www.gecacreativo.com",
-  "logo": "https://www.gecacreativo.com/Logo GECA.png",
-  "image": "https://www.gecacreativo.com/Logo GECA.png",
+  "logo": "https://www.gecacreativo.com/Logo%20GECA.png",
   "telephone": "+57-300-183-4330",
-  "email": "mentescreativas&#64;gecacreativo&#46;com",
+  "email": "mentescreativas@gecacreativo.com",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "Medellín",
     "addressRegion": "Antioquia",
     "addressCountry": "CO"
   },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": "6.2442",
-    "longitude": "-75.5812"
-  },
-  "sameAs": [
-    "https://www.linkedin.com/company/gecacreativo"
-  ],
+  "geo": { "@type": "GeoCoordinates", "latitude": "6.2442", "longitude": "-75.5812" },
+  "sameAs": ["https://www.linkedin.com/company/gecacreativo"],
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
     "name": "Servicios GECA Creativo",
     "itemListElement": [
-      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Liderazgo Organizacional"}},
-      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Desarrollo de Habilidades Blandas"}},
-      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Consultoría SAC y Ventas"}},
-      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Habilidades Comerciales"}}
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Liderazgo Organizacional"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Desarrollo de Habilidades Blandas"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Consultoría SAC y Ventas"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Habilidades Comerciales"}}
     ]
   },
-  "areaServed": {
-    "@type": "Country",
-    "name": "Colombia"
-  },
+  "areaServed": {"@type":"Country","name":"Colombia"},
   "priceRange": "$$"
 }
 </script>
- 
+
 <link rel="icon" href="favicon.png" type="image/png"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -85,99 +75,144 @@
 html{scroll-behavior:smooth}
 body{font-family:'Open Sans',sans-serif;background:var(--cream);color:var(--ink);overflow-x:hidden}
 img{display:block;max-width:100%;height:auto}
- 
-/* ── NAV ── */
+
+/* ══════════════════════════════
+   NAV — MOBILE FIRST
+══════════════════════════════ */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:300;
   height:64px;padding:0 1.25rem;
   display:flex;align-items:center;
-  transition:height .5s cubic-bezier(.4,0,.2,1),background .5s,box-shadow .5s;
+  /* fondo negro siempre en móvil para que hamburger y logo sean visibles */
+  background:var(--ink);
+  transition:height .5s cubic-bezier(.4,0,.2,1),
+             background .5s cubic-bezier(.4,0,.2,1),
+             box-shadow .5s;
 }
-nav.nav-top{background:transparent}
-nav.nav-scrolled{background:var(--blue);height:62px;box-shadow:0 4px 32px rgba(0,60,126,.28)}
- 
+nav.nav-scrolled{
+  background:var(--ink);
+  height:62px;
+  box-shadow:0 4px 32px rgba(0,0,0,.35);
+}
+
 .nav-inner{
   display:flex;align-items:center;justify-content:space-between;
   width:100%;max-width:1400px;margin:0 auto;
   height:100%;position:relative;
 }
+
+/* Logo mobile */
 .nav-logo{
   display:flex;align-items:center;text-decoration:none;flex-shrink:0;height:34px;
   transition:height .55s cubic-bezier(.4,0,.2,1),
-             left .55s cubic-bezier(.4,0,.2,1),
-             top .55s cubic-bezier(.4,0,.2,1),
              transform .55s cubic-bezier(.4,0,.2,1);
 }
 .nav-logo img{height:100%;width:auto;object-fit:contain;filter:none;transition:opacity .3s}
 .nav-logo:hover img{opacity:.85}
- 
+
+/* Links — ocultos en móvil por defecto */
 .nav-links{display:none;list-style:none}
-.nav-links.open{display:flex;flex-direction:column;position:fixed;inset:0;background:var(--blue);padding:5.5rem 2rem 2.5rem;z-index:290;align-items:flex-start;gap:.15rem;overflow-y:auto}
-.nav-links.open a{font-family:'Montserrat',sans-serif;font-size:1.15rem;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.88);text-decoration:none;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.08);width:100%;display:block}
-.nav-links.open .nav-cta-pill{color:var(--yellow)!important;background:transparent!important;border-radius:0!important;padding:.8rem 0!important;border-bottom:1px solid rgba(255,255,255,.08)!important;margin-left:0!important}
- 
-.hamburger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:.4rem;position:relative;z-index:310}
-.hamburger span{display:block;width:24px;height:2px;background:var(--blue);border-radius:2px;transition:all .3s}
-nav.nav-scrolled .hamburger span{background:var(--white)}
+
+/* Overlay móvil al abrir */
+.nav-links.open{
+  display:flex;flex-direction:column;
+  position:fixed;inset:0;
+  background:var(--ink);
+  padding:5.5rem 2rem 2.5rem;
+  z-index:290;align-items:flex-start;gap:.15rem;overflow-y:auto;
+}
+.nav-links.open a{
+  font-family:'Montserrat',sans-serif;font-size:1.15rem;font-weight:600;
+  letter-spacing:.04em;color:rgba(255,255,255,.88);text-decoration:none;
+  padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.08);width:100%;display:block;
+}
+.nav-links.open .nav-cta-pill{
+  color:var(--yellow)!important;background:transparent!important;
+  border-radius:0!important;padding:.8rem 0!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;margin-left:0!important;
+}
+
+/* Hamburger — siempre blanco sobre fondo negro */
+.hamburger{
+  display:flex;flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;padding:.4rem;
+  position:relative;z-index:310;
+}
+.hamburger span{
+  display:block;width:24px;height:2px;
+  background:var(--white); /* blanco siempre en móvil */
+  border-radius:2px;transition:all .3s;
+}
 .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .hamburger.active span:nth-child(2){opacity:0}
 .hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
- 
-/* ════════════════════════════
-   DESKTOP
-════════════════════════════ */
+
+/* ══════════════════════════════
+   DESKTOP NAV
+══════════════════════════════ */
 @media(min-width:768px){
-  nav{padding:0 2.5rem;height:180px}
-  nav.nav-top{background:transparent}
-  nav.nav-scrolled{height:62px;background:var(--ink)}
+  nav{
+    padding:0 2.5rem;
+    height:180px;
+    background:transparent; /* transparente sobre hero claro */
+  }
+  nav.nav-scrolled{
+    height:62px;
+    background:var(--ink);
+    box-shadow:0 4px 32px rgba(0,0,0,.35);
+  }
   .hamburger{display:none}
- 
+
   /* Columna centrada: links arriba, logo abajo */
   .nav-inner{
     flex-direction:column;
     justify-content:center;
     align-items:center;
     gap:8px;
-    position:relative;
   }
- 
-  /* LINKS: fila centrada */
+
+  /* Links: fila centrada */
   .nav-links{
     display:flex!important;
-    flex-direction:row;
-    align-items:center;
-    justify-content:center;
-    position:static;
-    background:none;padding:0;
+    flex-direction:row;align-items:center;justify-content:center;
+    position:static;background:none;padding:0;
     inset:auto;overflow:visible;white-space:nowrap;
-    order:1;
-    transition:none;
-    transform:none;
+    order:1;transition:none;transform:none;
   }
   .nav-links a{
     font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;
     letter-spacing:.12em;text-transform:uppercase;
-    color:rgba(0,60,126,.85);text-decoration:none;
-    padding:.4rem 1rem;display:block;transition:color .25s;
-    position:relative;border:none!important;width:auto!important;
+    color:rgba(0,60,126,.85);
+    text-decoration:none;padding:.4rem 1rem;display:block;
+    transition:color .25s;position:relative;
+    border:none!important;width:auto!important;
   }
-  .nav-links a::after{content:'';position:absolute;bottom:0;left:1rem;right:1rem;height:2px;background:var(--pink);transform:scaleX(0);transform-origin:center;transition:transform .3s;border-radius:2px}
+  .nav-links a::after{
+    content:'';position:absolute;bottom:0;left:1rem;right:1rem;
+    height:2px;background:var(--pink);
+    transform:scaleX(0);transform-origin:center;
+    transition:transform .3s;border-radius:2px;
+  }
   .nav-links a:hover{color:var(--blue)}
   .nav-links a:hover::after{transform:scaleX(1)}
-  .nav-cta-pill{display:inline-flex!important;align-items:center;background:var(--pink)!important;color:var(--white)!important;padding:.38rem 1.2rem!important;border-radius:100px;margin-left:.4rem;font-weight:700!important;transition:background .2s,transform .2s!important;border:none!important}
+  .nav-cta-pill{
+    display:inline-flex!important;align-items:center;
+    background:var(--pink)!important;color:var(--white)!important;
+    padding:.38rem 1.2rem!important;border-radius:100px;
+    margin-left:.4rem;font-weight:700!important;
+    transition:background .2s,transform .2s!important;border:none!important;
+  }
   .nav-cta-pill::after{display:none!important}
   .nav-cta-pill:hover{background:var(--orange)!important;transform:translateY(-1px)!important}
- 
-  /* LOGO: debajo de los links */
+
+  /* Logo: debajo de los links */
   .nav-logo{
-    position:static;
-    transform:none;
-    height:90px;
-    order:2;
+    position:static;transform:none;
+    height:90px;order:2;
     transition:height .5s cubic-bezier(.4,0,.2,1);
   }
- 
-  /* SCROLLED: fila única, logo izquierda, links centrados */
+
+  /* Scrolled: fila única, logo izquierda, links centrados */
   nav.nav-scrolled .nav-inner{
     flex-direction:row;
     justify-content:space-between;
@@ -185,11 +220,8 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
     gap:0;
   }
   nav.nav-scrolled .nav-logo{
-    height:30px;
-    order:1;
-    flex-shrink:0;
+    height:30px;order:1;flex-shrink:0;
   }
-  /* Links centrados ignorando el logo: truco con margin auto */
   nav.nav-scrolled .nav-links{
     position:absolute;
     left:0;right:0;
@@ -201,9 +233,17 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
   nav.nav-scrolled .nav-links a:hover{color:var(--white)}
   nav.nav-scrolled .nav-links a::after{background:var(--yellow)}
 }
- 
-/* ── HERO ── */
-#inicio{background:var(--cream);padding:calc(64px + 2rem) 1.25rem 3.5rem;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:100svh}
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+#inicio{
+  background:var(--cream);
+  padding:calc(64px + 2rem) 1.25rem 5rem;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  min-height:100svh;
+}
 .hero-accent-bar{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))}
 .hero-geo{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .hero-geo::before{content:'';position:absolute;width:min(700px,120vw);height:min(700px,120vw);border-radius:50%;border:1.5px solid rgba(0,60,126,.08);top:-30%;right:-30%}
@@ -222,6 +262,7 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
 .hero-img-badge{position:absolute;top:-14px;right:-12px;background:var(--pink);border-radius:12px;padding:.8rem 1rem;text-align:center;color:var(--white);box-shadow:0 8px 24px rgba(255,136,143,.45)}
 .hero-img-badge .num{font-family:'Montserrat',sans-serif;font-size:1.4rem;font-weight:900;line-height:1}
 .hero-img-badge .lbl{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.06em;opacity:.88;margin-top:.2rem}
+
 @media(min-width:900px){
   #inicio{display:grid;grid-template-columns:1fr 1fr;align-items:center;text-align:left;padding:calc(180px + 2rem) clamp(1.5rem,4vw,4rem) 5rem;gap:clamp(2rem,4vw,5rem)}
   .hero-content{order:1}.hero-img-wrap{order:2;max-width:none}
@@ -232,17 +273,14 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
   .hero-img-badge{top:-18px;right:-16px}
   .hero-img-badge .num{font-size:1.6rem}
 }
- 
-/* ── SCROLL INDICATOR ── */
+
+/* Scroll indicator */
 .hero-scroll{
   position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:.4rem;
-  color:var(--gray);
-  font-family:'Montserrat',sans-serif;
+  color:var(--gray);font-family:'Montserrat',sans-serif;
   font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
-  text-decoration:none;
-  transition:opacity .3s;
-  z-index:3;
+  text-decoration:none;transition:opacity .3s;z-index:3;
 }
 .hero-scroll:hover{opacity:.6}
 .scroll-line{
@@ -256,15 +294,17 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
   51% {transform:scaleY(1);transform-origin:bottom}
   100%{transform:scaleY(0);transform-origin:bottom}
 }
+
+/* Botones */
 .btn-primary{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--pink),var(--orange));color:var(--white);padding:.85rem 2rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.03em;text-decoration:none;box-shadow:0 6px 24px rgba(255,136,143,.38);transition:transform .2s,box-shadow .2s;white-space:nowrap}
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(255,136,143,.5)}
 .btn-ghost{display:inline-flex;align-items:center;gap:.5rem;border:2px solid var(--border);color:var(--ink);padding:.82rem 1.8rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:600;text-decoration:none;transition:border-color .2s,background .2s,transform .2s;white-space:nowrap}
 .btn-ghost:hover{border-color:var(--blue);background:rgba(0,60,126,.06);transform:translateY(-3px)}
- 
-/* ── DIVIDER ── */
+
+/* Divider */
 .divider-bar{height:5px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow),var(--green),var(--blue))}
- 
-/* ── BASE SECCIONES ── */
+
+/* Base secciones */
 section{padding:clamp(3rem,7vw,6rem) clamp(1rem,3vw,2rem)}
 .container{max-width:1160px;margin:0 auto}
 .section-tag{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;display:inline-flex;align-items:center;gap:.5rem;margin-bottom:.8rem}
@@ -277,8 +317,8 @@ section{padding:clamp(3rem,7vw,6rem) clamp(1rem,3vw,2rem)}
 h2.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.7rem,4vw,2.9rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:1rem}
 .section-lead{font-size:clamp(.9rem,1.5vw,1rem);color:var(--gray);line-height:1.85}
 .lema{font-family:'Montserrat',sans-serif;font-size:clamp(.75rem,1.5vw,.9rem);font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1.8}
- 
-/* ── SOMOS ── */
+
+/* Somos */
 #somosgeca{background:var(--blue);position:relative;overflow:hidden}
 #somosgeca::before{content:'GECA';position:absolute;font-family:'Montserrat',sans-serif;font-size:clamp(6rem,20vw,18rem);font-weight:900;color:rgba(255,255,255,.025);top:-2rem;right:-1rem;pointer-events:none;line-height:1;letter-spacing:-.05em;white-space:nowrap}
 .somos-grid{display:flex;flex-direction:column;gap:clamp(2rem,5vw,4rem)}
@@ -295,8 +335,8 @@ h2.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.7rem,4vw,
 .pillar-icon{font-size:1.35rem;flex-shrink:0}
 .pillar-title{font-family:'Montserrat',sans-serif;font-size:.86rem;font-weight:700;color:var(--white);margin-bottom:.25rem}
 .pillar-text{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6}
- 
-/* ── TALENTO ── */
+
+/* Talento */
 #talento{background:var(--cream)}
 .talento-intro{display:flex;flex-direction:column;gap:1.5rem;margin-bottom:2.5rem}
 @media(min-width:768px){.talento-intro{display:grid;grid-template-columns:1fr 1fr;align-items:end}}
@@ -322,8 +362,8 @@ h2.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.7rem,4vw,
 .service-card:nth-child(2)::after{background:var(--pink)}
 .service-card:nth-child(3)::after{background:var(--orange)}
 .service-card:nth-child(4)::after{background:var(--green)}
- 
-/* ── METODOLOGIA ── */
+
+/* Metodología */
 #prospectiva{background:var(--white)}
 .metodo-top{display:flex;flex-direction:column;gap:1.5rem;margin-bottom:2.5rem}
 @media(min-width:768px){.metodo-top{display:grid;grid-template-columns:1fr 1fr;align-items:center}}
@@ -342,15 +382,15 @@ h2.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.7rem,4vw,
 .step-card:hover .step-num{opacity:.28}
 .step-title{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.5rem}
 .step-text{font-size:.85rem;color:var(--gray);line-height:1.7}
- 
-/* ── CLIENTES ── */
+
+/* Clientes */
 .clientes-strip{background:linear-gradient(135deg,var(--blue),#001f44);padding:clamp(2.5rem,6vw,4.5rem) clamp(1rem,3vw,2rem);text-align:center}
 .cl-label{font-family:'Montserrat',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:clamp(1.5rem,4vw,2.8rem)}
 .cl-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(1.5rem,5vw,4rem)}
 .cl-logo-img{height:clamp(28px,5vw,44px);width:auto;max-width:120px;object-fit:contain;filter:brightness(0) invert(1);opacity:.38;transition:opacity .25s}
 .cl-logo-img:hover{opacity:.9}
- 
-/* ── CONTACTO ── */
+
+/* Contacto */
 #contacto{background:var(--cream);position:relative;overflow:hidden}
 #contacto::before{content:'';position:absolute;top:0;left:0;width:50%;height:100%;background:linear-gradient(180deg,rgba(255,136,143,.05),rgba(255,136,5,.03));pointer-events:none}
 .contacto-grid{display:flex;flex-direction:column;gap:clamp(2rem,5vw,4rem)}
@@ -376,26 +416,26 @@ h2.section-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.7rem,4vw,
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,136,143,.15)}
 .btn-form{width:100%;background:linear-gradient(135deg,var(--blue),#00509e);color:var(--white);border:none;border-radius:100px;padding:.95rem;font-family:'Montserrat',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:.04em;cursor:pointer;margin-top:.4rem;transition:transform .2s,box-shadow .2s}
 .btn-form:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,60,126,.3)}
- 
-/* ── FOOTER ── */
+
+/* Footer */
 footer{background:var(--ink);color:rgba(255,255,255,.35);padding:1.8rem clamp(1rem,3vw,2rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem;text-align:center;font-family:'Montserrat',sans-serif;font-size:.76rem;letter-spacing:.04em}
 .footer-logo{height:52px;width:auto;object-fit:contain;filter:none;opacity:1}
 footer strong{color:var(--pink);font-weight:600}
 @media(min-width:768px){footer{justify-content:space-between;text-align:left}}
- 
-/* ── REVEAL ── */
+
+/* Reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
- 
+
 <!-- NAV -->
 <nav class="nav-top" id="navbar">
   <div class="nav-inner">
     <a href="#inicio" class="nav-logo">
-      <img src="Logo GECA.png" alt="GECA Creativo"/>
+      <img src="Logo%20GECA.png" alt="GECA Creativo"/>
     </a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#inicio">Inicio</a></li>
@@ -409,7 +449,7 @@ footer strong{color:var(--pink);font-weight:600}
     </button>
   </div>
 </nav>
- 
+
 <!-- HERO -->
 <main>
 <section id="inicio">
@@ -438,16 +478,14 @@ footer strong{color:var(--pink);font-weight:600}
       <div class="lbl">Impacto Real</div>
     </div>
   </div>
- 
-  <!-- Scroll indicator -->
   <a href="#somosgeca" class="hero-scroll" aria-label="Ir al siguiente contenido">
     <div class="scroll-line"></div>
     <span>Scroll</span>
   </a>
 </section>
- 
+
 <div class="divider-bar"></div>
- 
+
 <!-- SOMOS -->
 <section id="somosgeca">
   <div class="container">
@@ -488,9 +526,9 @@ footer strong{color:var(--pink);font-weight:600}
     </div>
   </div>
 </section>
- 
+
 <div class="divider-bar"></div>
- 
+
 <!-- TALENTO -->
 <section id="talento">
   <div class="container">
@@ -566,10 +604,10 @@ footer strong{color:var(--pink);font-weight:600}
     </div>
   </div>
 </section>
- 
+
 <div class="divider-bar"></div>
- 
-<!-- METODOLOGIA -->
+
+<!-- METODOLOGÍA -->
 <section id="prospectiva">
   <div class="container">
     <div class="metodo-top">
@@ -622,7 +660,7 @@ footer strong{color:var(--pink);font-weight:600}
     </div>
   </div>
 </section>
- 
+
 <!-- CLIENTES -->
 <div class="clientes-strip reveal">
   <div class="container">
@@ -635,9 +673,9 @@ footer strong{color:var(--pink);font-weight:600}
     </div>
   </div>
 </div>
- 
+
 <div class="divider-bar"></div>
- 
+
 <!-- CONTACTO -->
 <section id="contacto">
   <div class="container">
@@ -659,7 +697,7 @@ footer strong{color:var(--pink);font-weight:600}
             <span class="ci-icon">&#128222;</span>
             <div><div class="ci-label">Tel&#233;fono</div><div class="ci-val">+57 300 183 4330</div></div>
           </a>
-          <a href="/cdn-cgi/l/email-protection#e68b838892839585948387928f908795c0c5d0d2dd8183858785948387928f9089c0c5d2d0dd85898b" class="contact-item reveal">
+          <a href="mailto:mentescreativas&#64;gecacreativo&#46;com" class="contact-item reveal">
             <span class="ci-icon">&#9993;&#65039;</span>
             <div><div class="ci-label">Correo</div><div class="ci-val">mentescreativas&#64;gecacreativo&#46;com</div></div>
           </a>
@@ -675,14 +713,14 @@ footer strong{color:var(--pink);font-weight:600}
           <a href="https://wa.me/573001834330" target="_blank" rel="noopener" class="social-icon-link" title="WhatsApp">
             <img src="whatsapp.png" alt="WhatsApp"/>
           </a>
-          <a href="/cdn-cgi/l/email-protection#6c01090218091f0f1e090d18051a0d1f4a4f5a58570b090f0d0f1e090d18051a034a4f585a570f0301" class="social-icon-link" title="Correo">
+          <a href="mailto:mentescreativas&#64;gecacreativo&#46;com" class="social-icon-link" title="Correo">
             <img src="correo-electronico.png" alt="Correo"/>
           </a>
         </div>
       </div>
       <div class="contact-form-box reveal">
         <h3>Cu&#233;ntanos sobre tu <span class="hi-pink">proyecto</span></h3>
-        <p>Escr&#237;benos y te contactaremos en menos de 24 horas.</p>
+        <p>Esch&#237;benos y te contactaremos en menos de 24 horas.</p>
         <div class="form-row">
           <div class="form-group">
             <label>Nombre</label>
@@ -713,21 +751,20 @@ footer strong{color:var(--pink);font-weight:600}
     </div>
   </div>
 </section>
- 
 </main>
- 
+
 <!-- FOOTER -->
 <footer>
-  <img class="footer-logo" src="Logo GECA.png" alt="GECA Creativo"/>
+  <img class="footer-logo" src="Logo%20GECA.png" alt="GECA Creativo"/>
   <span>&#169; 2025 <strong>GECA Creativo</strong>. Todos los derechos reservados &#8212; Medell&#237;n, Colombia.</span>
   <span style="opacity:.5;font-size:.7rem">mentescreativas&#64;gecacreativo&#46;com</span>
 </footer>
- 
+
 <script>
 var navbar    = document.getElementById('navbar');
 var hamburger = document.getElementById('hamburger');
 var navLinks  = document.getElementById('navLinks');
- 
+
 window.addEventListener('scroll', function(){
   if(window.scrollY > 50){
     navbar.classList.remove('nav-top');
@@ -736,14 +773,14 @@ window.addEventListener('scroll', function(){
     navbar.classList.remove('nav-scrolled');
     navbar.classList.add('nav-top');
   }
-}, {passive: true});
- 
+}, {passive:true});
+
 hamburger.addEventListener('click', function(){
   var open = navLinks.classList.toggle('open');
   hamburger.classList.toggle('active', open);
   document.body.style.overflow = open ? 'hidden' : '';
 });
- 
+
 navLinks.querySelectorAll('a').forEach(function(a){
   a.addEventListener('click', function(){
     navLinks.classList.remove('open');
@@ -751,7 +788,7 @@ navLinks.querySelectorAll('a').forEach(function(a){
     document.body.style.overflow = '';
   });
 });
- 
+
 var revealObs = new IntersectionObserver(function(entries){
   entries.forEach(function(entry, i){
     if(entry.isIntersecting){
@@ -759,8 +796,8 @@ var revealObs = new IntersectionObserver(function(entries){
       revealObs.unobserve(entry.target);
     }
   });
-}, {threshold: 0.1, rootMargin: '0px 0px -40px 0px'});
- 
+}, {threshold:0.1, rootMargin:'0px 0px -40px 0px'});
+
 document.querySelectorAll('.reveal').forEach(function(el){
   revealObs.observe(el);
 });
