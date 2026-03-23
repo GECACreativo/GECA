@@ -233,7 +233,29 @@ nav.nav-scrolled .hamburger span{background:var(--white)}
   .hero-img-badge .num{font-size:1.6rem}
 }
  
-/* ── BOTONES ── */
+/* ── SCROLL INDICATOR ── */
+.hero-scroll{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  color:var(--gray);
+  font-family:'Montserrat',sans-serif;
+  font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;
+  transition:opacity .3s;
+  z-index:3;
+}
+.hero-scroll:hover{opacity:.6}
+.scroll-line{
+  width:1px;height:40px;
+  background:linear-gradient(to bottom,var(--blue),transparent);
+  animation:scrollDrop 1.8s ease infinite;
+}
+@keyframes scrollDrop{
+  0%  {transform:scaleY(0);transform-origin:top}
+  50% {transform:scaleY(1);transform-origin:top}
+  51% {transform:scaleY(1);transform-origin:bottom}
+  100%{transform:scaleY(0);transform-origin:bottom}
+}
 .btn-primary{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--pink),var(--orange));color:var(--white);padding:.85rem 2rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.03em;text-decoration:none;box-shadow:0 6px 24px rgba(255,136,143,.38);transition:transform .2s,box-shadow .2s;white-space:nowrap}
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(255,136,143,.5)}
 .btn-ghost{display:inline-flex;align-items:center;gap:.5rem;border:2px solid var(--border);color:var(--ink);padding:.82rem 1.8rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:600;text-decoration:none;transition:border-color .2s,background .2s,transform .2s;white-space:nowrap}
@@ -416,6 +438,12 @@ footer strong{color:var(--pink);font-weight:600}
       <div class="lbl">Impacto Real</div>
     </div>
   </div>
+ 
+  <!-- Scroll indicator -->
+  <a href="#somosgeca" class="hero-scroll" aria-label="Ir al siguiente contenido">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </a>
 </section>
  
 <div class="divider-bar"></div>
@@ -631,7 +659,7 @@ footer strong{color:var(--pink);font-weight:600}
             <span class="ci-icon">&#128222;</span>
             <div><div class="ci-label">Tel&#233;fono</div><div class="ci-val">+57 300 183 4330</div></div>
           </a>
-          <a href="mailto:mentescreativas&#64;gecacreativo&#46;com" class="contact-item reveal">
+          <a href="/cdn-cgi/l/email-protection#e68b838892839585948387928f908795c0c5d0d2dd8183858785948387928f9089c0c5d2d0dd85898b" class="contact-item reveal">
             <span class="ci-icon">&#9993;&#65039;</span>
             <div><div class="ci-label">Correo</div><div class="ci-val">mentescreativas&#64;gecacreativo&#46;com</div></div>
           </a>
@@ -645,9 +673,9 @@ footer strong{color:var(--pink);font-weight:600}
             <img src="linkedin.png" alt="LinkedIn"/>
           </a>
           <a href="https://wa.me/573001834330" target="_blank" rel="noopener" class="social-icon-link" title="WhatsApp">
-            <img src="whatsapp.png" alt="WhatsApp"/>
+            <img src="WhatsApp.png" alt="WhatsApp"/>
           </a>
-          <a href="mailto:mentescreativas&#64;gecacreativo&#46;com" class="social-icon-link" title="Correo">
+          <a href="/cdn-cgi/l/email-protection#6c01090218091f0f1e090d18051a0d1f4a4f5a58570b090f0d0f1e090d18051a034a4f585a570f0301" class="social-icon-link" title="Correo">
             <img src="correo-electronico.png" alt="Correo"/>
           </a>
         </div>
@@ -691,12 +719,11 @@ footer strong{color:var(--pink);font-weight:600}
 <!-- FOOTER -->
 <footer>
   <img class="footer-logo" src="Logo GECA.png" alt="GECA Creativo"/>
-  <span>&#169; 2026 <strong>GECA Creativo</strong>. Todos los derechos reservados &#8212; Medell&#237;n, Colombia.</span>
+  <span>&#169; 2025 <strong>GECA Creativo</strong>. Todos los derechos reservados &#8212; Medell&#237;n, Colombia.</span>
   <span style="opacity:.5;font-size:.7rem">mentescreativas&#64;gecacreativo&#46;com</span>
 </footer>
-</footer>
  
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var navbar    = document.getElementById('navbar');
 var hamburger = document.getElementById('hamburger');
 var navLinks  = document.getElementById('navLinks');
