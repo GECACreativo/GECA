@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin &#8212; GECA Creativo</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" href="favicon.png" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--pink:#FF888F;--orange:#FF8805;--blue:#003C7E;--green:#1F5720;--ink:#0f0e0d;--cream:#faf8f4;--white:#ffffff;--gray:#5a5550;--border:rgba(0,60,126,.11);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
+.accent-bar{height:4px;background:linear-gradient(90deg,var(--pink),var(--orange),#FFEF8F)}
+
+/* HEADER */
+header{background:var(--ink);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.header-brand{display:flex;align-items:center;gap:.75rem}
+.header-brand img{height:36px;width:auto;filter:none}
+.admin-badge{background:rgba(255,136,143,.2);border:1px solid rgba(255,136,143,.35);color:var(--pink);font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .7rem;border-radius:100px}
+.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:.4rem 1rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-logout:hover{background:rgba(255,255,255,.15)}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 68px)}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:2rem 0}
+.sidebar-title{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);padding:0 1.5rem;margin-bottom:.75rem}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:600;color:var(--gray);cursor:pointer;transition:background .2s,color .2s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(0,60,126,.04);color:var(--blue)}
+.nav-item.active{background:rgba(0,60,126,.06);color:var(--blue);border-left-color:var(--blue)}
+.nav-icon{font-size:1rem;width:20px;text-align:center}
+@media(max-width:768px){.sidebar{display:flex;overflow-x:auto;padding:.5rem;gap:.25rem;border-right:none;border-bottom:1px solid var(--border)}.nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;border-radius:8px}.nav-item.active{border-bottom-color:var(--blue)}}
+
+/* CONTENT */
+.content{padding:2.5rem 2rem;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.page-title{font-family:'Montserrat',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.4rem;letter-spacing:-0.02em}
+.page-sub{font-size:.9rem;color:var(--gray);margin-bottom:2rem}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2.5rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;text-align:center}
+.stat-num{font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:900;color:var(--blue);line-height:1}
+.stat-label{font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-top:.4rem}
+
+/* Formularios */
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:1.5rem}
+.card-title{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.6rem}
+.card-title::before{content:'';display:block;width:4px;height:16px;border-radius:2px;background:var(--pink)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+.fg{margin-bottom:.9rem}
+.fg label{display:block;font-family:'Montserrat',sans-serif;font-size:.63rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin-bottom:.38rem}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.7rem .9rem;color:var(--ink);font-family:'Open Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;resize:none;appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,136,143,.12)}
+.btn-primary{background:linear-gradient(135deg,var(--blue),#00509e);color:var(--white);border:none;border-radius:100px;padding:.75rem 1.8rem;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;letter-spacing:.04em}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,60,126,.3)}
+.btn-danger{background:rgba(255,136,143,.1);color:#c02535;border:1px solid rgba(255,136,143,.3);border-radius:100px;padding:.4rem .9rem;font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-danger:hover{background:rgba(255,136,143,.2)}
+
+/* Tablas */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);padding:.75rem 1rem;text-align:left;border-bottom:2px solid var(--border)}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--border);font-size:.875rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,60,126,.02)}
+.td-email{color:var(--gray);font-size:.82rem}
+.td-link a{color:var(--blue);font-size:.82rem;text-decoration:none;font-weight:600}
+.td-link a:hover{text-decoration:underline}
+.mes-badge{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;background:rgba(0,60,126,.08);color:var(--blue);padding:.2rem .6rem;border-radius:100px;white-space:nowrap}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink);color:var(--white);padding:.9rem 1.4rem;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.3);transform:translateY(20px);opacity:0;transition:all .3s;z-index:999;border-left:4px solid var(--green)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-left-color:var(--pink)}
+
+/* Empty */
+.empty{text-align:center;padding:3rem;color:var(--gray);font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:600;opacity:.5}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:2rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN OVERLAY ADMIN ── */
+#adminLogin{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+}
+#adminLogin .bg-deco{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+#adminLogin .bg-deco::before{
+  content:'';position:absolute;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,60,126,.5),transparent 70%);
+  top:-150px;right:-150px;
+}
+#adminLogin .bg-deco::after{
+  content:'';position:absolute;
+  width:350px;height:350px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,136,143,.12),transparent 70%);
+  bottom:-80px;left:-80px;
+}
+#adminLogin .login-box{
+  position:relative;z-index:2;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  padding:2.8rem 2.4rem;
+  width:100%;max-width:400px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 32px 80px rgba(0,0,0,.5);
+  margin:1rem;
+}
+#adminLogin .al-logo{display:flex;justify-content:center;margin-bottom:1.8rem}
+#adminLogin .al-logo img{height:65px;width:auto;object-fit:contain}
+#adminLogin .al-title{
+  font-family:'Montserrat',sans-serif;font-size:1.25rem;font-weight:800;
+  color:var(--white);text-align:center;margin-bottom:.3rem;
+}
+#adminLogin .al-sub{
+  font-size:.82rem;color:rgba(255,255,255,.45);text-align:center;
+  margin-bottom:1.8rem;letter-spacing:.02em;
+}
+#adminLogin .al-badge{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  background:rgba(255,136,143,.12);border:1px solid rgba(255,136,143,.3);
+  color:var(--pink);border-radius:100px;padding:.35rem .9rem;
+  font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:1.8rem;width:fit-content;margin-left:auto;margin-right:auto;
+}
+#adminLogin .al-badge::before{content:'&#128274;';font-size:.75rem}
+#adminLogin .fg{margin-bottom:1rem}
+#adminLogin .fg label{
+  display:block;font-family:'Montserrat',sans-serif;
+  font-size:.63rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.45);margin-bottom:.4rem;
+}
+#adminLogin .fg input{
+  width:100%;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:.8rem 1rem;color:var(--white);
+  font-family:'Open Sans',sans-serif;font-size:.9rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+#adminLogin .fg input::placeholder{color:rgba(255,255,255,.2)}
+#adminLogin .fg input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,136,143,.12)}
+#adminLogin .al-btn{
+  width:100%;margin-top:.5rem;
+  background:linear-gradient(135deg,var(--blue),#00509e);
+  color:var(--white);border:none;border-radius:100px;
+  padding:.95rem;font-family:'Montserrat',sans-serif;
+  font-size:.9rem;font-weight:700;cursor:pointer;
+  letter-spacing:.04em;transition:transform .2s,box-shadow .2s,opacity .2s;
+  box-shadow:0 6px 24px rgba(0,60,126,.4);
+}
+#adminLogin .al-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,60,126,.5)}
+#adminLogin .al-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+#adminLogin .al-err{
+  background:rgba(255,136,143,.12);border:1px solid rgba(255,136,143,.3);
+  color:var(--pink);border-radius:10px;padding:.7rem 1rem;
+  font-size:.82rem;text-align:center;margin-top:.9rem;display:none;
+}
+#adminLogin .al-err.show{display:block}
+#adminLogin .al-back{
+  display:block;text-align:center;margin-top:1.4rem;
+  font-size:.75rem;color:rgba(255,255,255,.3);text-decoration:none;
+  font-family:'Montserrat',sans-serif;letter-spacing:.04em;
+  transition:color .2s;
+}
+#adminLogin .al-back:hover{color:rgba(255,255,255,.6)}
+
+/* Ocultar todo el admin hasta autenticar */
+#adminApp{display:none}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ADMIN (visible hasta autenticar) ── -->
+<div id="adminLogin">
+  <div class="bg-deco"></div>
+  <div class="login-box">
+    <div class="al-logo"><img src="Logo%20GECA.png" alt="GECA Creativo"/></div>
+    <h1 class="al-title">Acceso Restringido</h1>
+    <p class="al-sub">Panel exclusivo para administradores GECA Creativo</p>
+    <div class="al-badge">&#160;&#160;Solo personal autorizado</div>
+    <div class="fg">
+      <label>Correo administrador</label>
+      <input type="email" id="al-email" placeholder="admin@gecacreativo.com" autocomplete="email"/>
+    </div>
+    <div class="fg">
+      <label>Contrase&#241;a</label>
+      <input type="password" id="al-pass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password"/>
+    </div>
+    <button class="al-btn" id="al-btn" onclick="adminLogin()">Ingresar al panel &#8594;</button>
+    <div class="al-err" id="al-err"></div>
+    <a href="index.html" class="al-back">&#8592; Volver al sitio principal</a>
+  </div>
+</div>
+
+<!-- ── PANEL ADMIN (oculto hasta autenticar) ── -->
+<div id="adminApp">
+<div class="accent-bar"></div>
+
+<header>
+  <div class="header-brand">
+    <img src="Logo%20GECA.png" alt="GECA Creativo"/>
+    <span class="admin-badge">Administrador</span>
+  </div>
+  <button class="btn-logout" onclick="logout()">Cerrar sesi&#243;n</button>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Men&#250;</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">&#128202;</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('clientes')"><span class="nav-icon">&#128101;</span> Clientes</div>
+    <div class="nav-item" onclick="showPage('informes')"><span class="nav-icon">&#128196;</span> Informes</div>
+    <div class="nav-item" onclick="showPage('nuevo-informe')"><span class="nav-icon">&#43;</span> Agregar Informe</div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <h1 class="page-title">Panel de Control</h1>
+      <p class="page-sub">Resumen general del portal de clientes GECA Creativo.</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statClientes">-</div>
+          <div class="stat-label">Clientes activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statInformes">-</div>
+          <div class="stat-label">Informes totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statMes">-</div>
+          <div class="stat-label">Informes este mes</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Accesos r&#225;pidos</div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn-primary" onclick="showPage('clientes')" style="background:linear-gradient(135deg,var(--pink),var(--orange))">&#128101; Ver Clientes</button>
+          <button class="btn-primary" onclick="showPage('nuevo-informe')">&#43; Agregar Informe</button>
+          <button class="btn-primary" onclick="showPage('informes')" style="background:linear-gradient(135deg,var(--green),#2d7a2e)">&#128196; Ver Informes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="page" id="page-clientes">
+      <h1 class="page-title">Clientes</h1>
+      <p class="page-sub">Gestiona los clientes que tienen acceso al portal.</p>
+
+      <div class="card">
+        <div class="card-title">Agregar nuevo cliente</div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Nombre de la empresa</label>
+            <input type="text" id="c-empresa" placeholder="Empresa S.A.S"/>
+          </div>
+          <div class="fg">
+            <label>Correo electr&#243;nico (ser&#225; el usuario)</label>
+            <input type="email" id="c-email" placeholder="contacto@empresa.com"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Contrase&#241;a temporal</label>
+            <input type="text" id="c-pass" placeholder="M&#237;nimo 8 caracteres"/>
+          </div>
+          <div class="fg">
+            <label>Persona de contacto</label>
+            <input type="text" id="c-contacto" placeholder="Nombre completo"/>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="crearCliente()">Crear cliente</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Clientes registrados</div>
+        <div id="tablaClientes"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- INFORMES -->
+    <div class="page" id="page-informes">
+      <h1 class="page-title">Informes</h1>
+      <p class="page-sub">Todos los informes cargados en el portal.</p>
+      <div class="card">
+        <div class="fg">
+          <label>Filtrar por cliente</label>
+          <select id="filtroCliente" onchange="cargarInformesTabla()">
+            <option value="">Todos los clientes</option>
+          </select>
+        </div>
+        <div id="tablaInformes"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- NUEVO INFORME -->
+    <div class="page" id="page-nuevo-informe">
+      <h1 class="page-title">Agregar Informe</h1>
+      <p class="page-sub">Asocia un informe a un cliente espec&#237;fico.</p>
+      <div class="card">
+        <div class="card-title">Datos del informe</div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Cliente</label>
+            <select id="i-cliente">
+              <option value="">Selecciona un cliente...</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>T&#237;tulo del informe</label>
+            <input type="text" id="i-titulo" placeholder="Ej: Informe de Clima Organizacional"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Mes</label>
+            <select id="i-mes">
+              <option value="1">Enero</option><option value="2">Febrero</option>
+              <option value="3">Marzo</option><option value="4">Abril</option>
+              <option value="5">Mayo</option><option value="6">Junio</option>
+              <option value="7">Julio</option><option value="8">Agosto</option>
+              <option value="9">Septiembre</option><option value="10">Octubre</option>
+              <option value="11">Noviembre</option><option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>A&#241;o</label>
+            <input type="number" id="i-anio" value="2025" min="2020" max="2030"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Enlace del informe</label>
+          <input type="url" id="i-enlace" placeholder="https://docs.google.com/... o cualquier enlace"/>
+        </div>
+        <div class="fg">
+          <label>Descripci&#243;n (opcional)</label>
+          <textarea id="i-descripcion" rows="2" placeholder="Breve descripci&#243;n del contenido del informe..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="agregarInforme()">Guardar informe</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPABASE_URL = 'TU_SUPABASE_URL';
+var SUPABASE_KEY = 'TU_SUPABASE_ANON_KEY';
+var ADMIN_EMAIL  = 'admin@gecacreativo.com'; // Cambia por el correo del admin
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var clientesCache = [];
+
+async function adminLogin(){
+  var email = document.getElementById('al-email').value.trim();
+  var pass  = document.getElementById('al-pass').value;
+  var btn   = document.getElementById('al-btn');
+  var err   = document.getElementById('al-err');
+  if(!email||!pass){ showLoginErr('Completa todos los campos.'); return; }
+  btn.disabled=true; btn.textContent='Verificando...'; err.classList.remove('show');
+
+  // 1. Autenticar con Supabase
+  var r = await sb.auth.signInWithPassword({email:email, password:pass});
+  if(r.error){ showLoginErr('Credenciales incorrectas.'); btn.disabled=false; btn.textContent='Ingresar al panel \u2192'; return; }
+
+  // 2. Verificar que el usuario sea administrador en la tabla admins
+  var adminCheck = await sb.from('admins').select('id').eq('user_id', r.data.user.id).single();
+  if(adminCheck.error || !adminCheck.data){
+    await sb.auth.signOut();
+    showLoginErr('No tienes permisos de administrador.');
+    btn.disabled=false; btn.textContent='Ingresar al panel \u2192'; return;
+  }
+
+  // 3. Acceso concedido
+  btn.textContent = '\u2713 Acceso concedido';
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  await cargarStats();
+  await cargarClientesCache();
+  cargarTablaClientes();
+  cargarInformesTabla();
+  llenarSelectClientes();
+}
+
+function showLoginErr(msg){
+  var e = document.getElementById('al-err');
+  e.textContent = msg; e.classList.add('show');
+}
+
+async function init(){
+  // Si ya hay sesión activa, verificar si es admin
+  var session = await sb.auth.getSession();
+  if(!session.data.session) return; // mostrar login
+
+  var adminCheck = await sb.from('admins').select('id').eq('user_id', session.data.session.user.id).single();
+  if(adminCheck.error || !adminCheck.data){
+    await sb.auth.signOut(); return;
+  }
+
+  // Sesión admin válida: saltar el login
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  await cargarStats();
+  await cargarClientesCache();
+  cargarTablaClientes();
+  cargarInformesTabla();
+  llenarSelectClientes();
+}
+
+async function cargarStats(){
+  var c = await sb.from('clientes').select('id',{count:'exact'});
+  var i = await sb.from('informes').select('id',{count:'exact'});
+  var mesActual = new Date().getMonth()+1;
+  var anioActual = new Date().getFullYear();
+  var im = await sb.from('informes').select('id',{count:'exact'}).eq('mes',mesActual).eq('anio',anioActual);
+  document.getElementById('statClientes').textContent = c.count || 0;
+  document.getElementById('statInformes').textContent = i.count || 0;
+  document.getElementById('statMes').textContent = im.count || 0;
+}
+
+async function cargarClientesCache(){
+  var r = await sb.from('clientes').select('*').order('empresa');
+  clientesCache = r.data || [];
+}
+
+function llenarSelectClientes(){
+  var selects = [document.getElementById('i-cliente'), document.getElementById('filtroCliente')];
+  clientesCache.forEach(function(c){
+    selects.forEach(function(sel){
+      if(!sel) return;
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = c.empresa;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function cargarTablaClientes(){
+  var cont = document.getElementById('tablaClientes');
+  if(clientesCache.length === 0){ cont.innerHTML='<p class="empty">No hay clientes registrados.</p>'; return; }
+  var html = '<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  clientesCache.forEach(function(c){
+    html += '<tr><td><strong>' + c.empresa + '</strong></td><td>' + (c.contacto||'-') + '</td><td class="td-email">' + c.email + '</td><td><button class="btn-danger" onclick="eliminarCliente(\'' + c.id + '\')">Eliminar</button></td></tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
+}
+
+async function cargarInformesTabla(){
+  var cont = document.getElementById('tablaInformes');
+  cont.innerHTML = '<div class="spinner"></div>';
+  var filtro = document.getElementById('filtroCliente');
+  var query = sb.from('informes').select('*, clientes(empresa)').order('anio',{ascending:false}).order('mes',{ascending:false});
+  if(filtro && filtro.value) query = query.eq('cliente_id', filtro.value);
+  var r = await query;
+  var data = r.data || [];
+  var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  if(data.length===0){ cont.innerHTML='<p class="empty">No hay informes cargados.</p>'; return; }
+  var html='<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>T&#237;tulo</th><th>Periodo</th><th>Enlace</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  data.forEach(function(i){
+    html+='<tr><td>' + (i.clientes?i.clientes.empresa:'-') + '</td><td><strong>' + i.titulo + '</strong></td><td><span class="mes-badge">' + MESES[i.mes-1] + ' ' + i.anio + '</span></td><td class="td-link"><a href="' + i.enlace + '" target="_blank">Ver &#8594;</a></td><td><button class="btn-danger" onclick="eliminarInforme(\'' + i.id + '\')">Eliminar</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  cont.innerHTML=html;
+}
+
+async function crearCliente(){
+  var empresa  = document.getElementById('c-empresa').value.trim();
+  var email    = document.getElementById('c-email').value.trim();
+  var pass     = document.getElementById('c-pass').value.trim();
+  var contacto = document.getElementById('c-contacto').value.trim();
+  if(!empresa||!email||!pass){ toast('Completa todos los campos requeridos.','error'); return; }
+  if(pass.length < 8){ toast('La contrase\u00f1a debe tener m\u00ednimo 8 caracteres.','error'); return; }
+  var authR = await sb.auth.admin.createUser({email:email, password:pass, email_confirm:true});
+  if(authR.error){ toast('Error: ' + authR.error.message,'error'); return; }
+  var dbR = await sb.from('clientes').insert({user_id:authR.data.user.id, empresa:empresa, email:email, contacto:contacto});
+  if(dbR.error){ toast('Error al guardar cliente.','error'); return; }
+  toast('Cliente "' + empresa + '" creado correctamente.');
+  document.getElementById('c-empresa').value='';
+  document.getElementById('c-email').value='';
+  document.getElementById('c-pass').value='';
+  document.getElementById('c-contacto').value='';
+  await cargarClientesCache();
+  cargarTablaClientes();
+  cargarStats();
+}
+
+async function agregarInforme(){
+  var clienteId  = document.getElementById('i-cliente').value;
+  var titulo     = document.getElementById('i-titulo').value.trim();
+  var mes        = parseInt(document.getElementById('i-mes').value);
+  var anio       = parseInt(document.getElementById('i-anio').value);
+  var enlace     = document.getElementById('i-enlace').value.trim();
+  var descripcion= document.getElementById('i-descripcion').value.trim();
+  if(!clienteId||!titulo||!enlace){ toast('Completa cliente, t\u00edtulo y enlace.','error'); return; }
+  var r = await sb.from('informes').insert({cliente_id:clienteId, titulo:titulo, mes:mes, anio:anio, enlace:enlace, descripcion:descripcion});
+  if(r.error){ toast('Error al guardar informe.','error'); return; }
+  toast('Informe agregado correctamente.');
+  document.getElementById('i-titulo').value='';
+  document.getElementById('i-enlace').value='';
+  document.getElementById('i-descripcion').value='';
+  cargarStats();
+  cargarInformesTabla();
+}
+
+async function eliminarCliente(id){
+  if(!confirm('\u00bfEliminar este cliente y todos sus informes?')) return;
+  await sb.from('informes').delete().eq('cliente_id',id);
+  await sb.from('clientes').delete().eq('id',id);
+  toast('Cliente eliminado.');
+  await cargarClientesCache();
+  cargarTablaClientes();
+  cargarInformesTabla();
+  cargarStats();
+}
+
+async function eliminarInforme(id){
+  if(!confirm('\u00bfEliminar este informe?')) return;
+  await sb.from('informes').delete().eq('id',id);
+  toast('Informe eliminado.');
+  cargarInformesTabla();
+  cargarStats();
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  window.location.href = 'admin.html';
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='informes') cargarInformesTabla();
+}
+
+function toast(msg, tipo){
+  var el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast'+(tipo==='error'?' error':'');
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show')},3000);
+}
+
+// Enter para login
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && document.getElementById('adminLogin').style.display !== 'none') adminLogin();
+});
+
+init();
+</script>
+</div><!-- /adminApp -->
+</body>
+</html>
