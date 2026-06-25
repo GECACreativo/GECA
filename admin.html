@@ -483,18 +483,23 @@ async function cargarInformesTabla(){
 async function crearCliente(){
   var empresa  = document.getElementById('c-empresa').value.trim();
   var email    = document.getElementById('c-email').value.trim();
-  var pass     = document.getElementById('c-pass').value.trim();
   var contacto = document.getElementById('c-contacto').value.trim();
-  if(!empresa||!email||!pass){ toast('Completa todos los campos requeridos.','error'); return; }
-  if(pass.length < 8){ toast('La contrase\u00f1a debe tener m\u00ednimo 8 caracteres.','error'); return; }
-  var authR = await sb.auth.admin.createUser({email:email, password:pass, email_confirm:true});
-  if(authR.error){ toast('Error: ' + authR.error.message,'error'); return; }
-  var dbR = await sb.from('clientes').insert({user_id:authR.data.user.id, empresa:empresa, email:email, contacto:contacto});
-  if(dbR.error){ toast('Error al guardar cliente.','error'); return; }
-  toast('Cliente "' + empresa + '" creado correctamente.');
+  if(!empresa || !email){
+    toast('Completa los campos requeridos.','error');
+    return;
+  }
+  var dbR = await sb.from('clientes').insert({
+    empresa: empresa,
+    email: email,
+    contacto: contacto
+  });
+  if(dbR.error){
+    toast('Error al guardar cliente: ' + dbR.error.message,'error');
+    return;
+  }
+  toast('Cliente creado correctamente.');
   document.getElementById('c-empresa').value='';
   document.getElementById('c-email').value='';
-  document.getElementById('c-pass').value='';
   document.getElementById('c-contacto').value='';
   await cargarClientesCache();
   cargarTablaClientes();
