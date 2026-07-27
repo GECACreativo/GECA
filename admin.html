@@ -135,7 +135,7 @@ tr:hover td{background:rgba(0,60,126,.02)}
   letter-spacing:.1em;text-transform:uppercase;
   margin-bottom:1.8rem;width:fit-content;margin-left:auto;margin-right:auto;
 }
-#adminLogin .al-badge::before{content:'&#128274;';font-size:.75rem}
+#adminLogin .al-badge::before{content:'🔒';font-size:.75rem}
 #adminLogin .fg{margin-bottom:1rem}
 #adminLogin .fg label{
   display:block;font-family:'Montserrat',sans-serif;
@@ -263,28 +263,33 @@ tr:hover td{background:rgba(0,60,126,.02)}
       <p class="page-sub">Gestiona los clientes que tienen acceso al portal.</p>
 
       <div class="card">
-        <div class="card-title">Agregar nuevo cliente</div>
+        <div class="card-title">Paso 1: crear el usuario de acceso</div>
+        <p class="page-sub" style="margin-bottom:1rem">Ve a tu proyecto de Supabase &#8594; <strong>Authentication &#8594; Users &#8594; Add user</strong>, crea el usuario con el correo y una contrase&#241;a temporal para el cliente, y copia el <strong>UID</strong> que se genera.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Paso 2: vincular el cliente al portal</div>
         <div class="form-row">
           <div class="fg">
             <label>Nombre de la empresa</label>
             <input type="text" id="c-empresa" placeholder="Empresa S.A.S"/>
           </div>
           <div class="fg">
-            <label>Correo electr&#243;nico (ser&#225; el usuario)</label>
+            <label>Correo electr&#243;nico</label>
             <input type="email" id="c-email" placeholder="contacto@empresa.com"/>
           </div>
         </div>
         <div class="form-row">
           <div class="fg">
-            <label>Contrase&#241;a temporal</label>
-            <input type="text" id="c-pass" placeholder="M&#237;nimo 8 caracteres"/>
+            <label>UID de Supabase (del Paso 1)</label>
+            <input type="text" id="c-uid" placeholder="Ej: 594a9bfd-ea1d-4a94-a832-067b4859be89"/>
           </div>
           <div class="fg">
             <label>Persona de contacto</label>
             <input type="text" id="c-contacto" placeholder="Nombre completo"/>
           </div>
         </div>
-        <button class="btn-primary" onclick="crearCliente()">Crear cliente</button>
+        <button class="btn-primary" onclick="crearCliente()">Vincular cliente</button>
       </div>
 
       <div class="card">
@@ -362,8 +367,7 @@ tr:hover td{background:rgba(0,60,126,.02)}
 
 <script>
 var SUPABASE_URL = 'https://aynfjhepnsidssrxblat.supabase.co';
-var SUPABASE_KEY = 'sb_publishable_WdFUbarKlUsg-de3J0vnAg_TQkQWGfq';
-var ADMIN_EMAIL  = 'camilo.echeverry@gecacreativo.com'; // Cambia por el correo del admin
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5bmZqaGVwbnNpZHNzcnhibGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4ODMzODQsImV4cCI6MjA5NzQ1OTM4NH0.-N-cl71RSf4SjxlxiBk9k2m90kTUCVjxfl5rfacwd98';
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 var clientesCache = [];
 
@@ -483,23 +487,15 @@ async function cargarInformesTabla(){
 async function crearCliente(){
   var empresa  = document.getElementById('c-empresa').value.trim();
   var email    = document.getElementById('c-email').value.trim();
+  var uid      = document.getElementById('c-uid').value.trim();
   var contacto = document.getElementById('c-contacto').value.trim();
-  if(!empresa || !email){
-    toast('Completa los campos requeridos.','error');
-    return;
-  }
-  var dbR = await sb.from('clientes').insert({
-    empresa: empresa,
-    email: email,
-    contacto: contacto
-  });
-  if(dbR.error){
-    toast('Error al guardar cliente: ' + dbR.error.message,'error');
-    return;
-  }
-  toast('Cliente creado correctamente.');
+  if(!empresa||!email||!uid){ toast('Completa empresa, correo y UID.','error'); return; }
+  var dbR = await sb.from('clientes').insert({user_id:uid, empresa:empresa, email:email, contacto:contacto});
+  if(dbR.error){ toast('Error al guardar cliente: ' + dbR.error.message,'error'); return; }
+  toast('Cliente "' + empresa + '" vinculado correctamente.');
   document.getElementById('c-empresa').value='';
   document.getElementById('c-email').value='';
+  document.getElementById('c-uid').value='';
   document.getElementById('c-contacto').value='';
   await cargarClientesCache();
   cargarTablaClientes();

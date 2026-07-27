@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mis Informes &#8212; GECA Creativo</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" href="favicon.png" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--pink:#FF888F;--orange:#FF8805;--yellow:#FFEF8F;--blue:#003C7E;--green:#1F5720;--ink:#0f0e0d;--cream:#faf8f4;--white:#ffffff;--gray:#5a5550;--border:rgba(0,60,126,.11);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
+
+/* HEADER */
+header{background:var(--ink);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.header-logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.header-logo img{height:38px;width:auto;object-fit:contain;filter:none}
+.header-logo span{font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:1rem}
+.user-name{font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.04em}
+.btn-logout{background:rgba(255,136,143,.15);border:1px solid rgba(255,136,143,.3);color:var(--pink);padding:.4rem 1rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:.04em}
+.btn-logout:hover{background:rgba(255,136,143,.25)}
+.accent-bar{height:4px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))}
+
+/* MAIN */
+main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
+
+/* Bienvenida */
+.welcome-section{margin-bottom:3rem}
+.welcome-tag{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.welcome-tag::before{content:'';display:block;width:18px;height:2px;background:var(--pink);border-radius:2px}
+.welcome-title{font-family:'Montserrat',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:.5rem}
+.welcome-sub{font-size:.95rem;color:var(--gray);line-height:1.7}
+.empresa-name{color:var(--blue);font-weight:700}
+
+/* Filtros por año */
+.filter-row{display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;flex-wrap:wrap}
+.filter-label{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray)}
+.filter-btn{font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;padding:.35rem .9rem;border-radius:100px;border:1.5px solid var(--border);background:var(--white);color:var(--gray);cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:var(--white)}
+.filter-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+
+/* Meses */
+.month-section{margin-bottom:2.5rem}
+.month-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
+.month-title{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);text-transform:capitalize}
+.month-line{flex:1;height:1px;background:var(--border)}
+.month-count{font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:600;color:var(--gray);letter-spacing:.06em;white-space:nowrap}
+
+/* Cards de informes */
+.informes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.informe-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.4rem;display:flex;flex-direction:column;gap:.8rem;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--ink)}
+.informe-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,60,126,.1);border-color:var(--blue)}
+.informe-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem}
+.informe-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(0,60,126,.1),rgba(0,60,126,.05));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.informe-badge{font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,60,126,.08);color:var(--blue);padding:.2rem .6rem;border-radius:100px}
+.informe-title{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:700;line-height:1.3}
+.informe-desc{font-size:.82rem;color:var(--gray);line-height:1.6}
+.informe-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.6rem;border-top:1px solid var(--border);margin-top:auto}
+.informe-date{font-family:'Montserrat',sans-serif;font-size:.7rem;color:var(--gray);letter-spacing:.04em}
+.informe-link{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;color:var(--pink);letter-spacing:.04em;display:flex;align-items:center;gap:.3rem}
+
+/* Estado vacío */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--gray)}
+.empty-state .icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+.empty-state p{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:600;opacity:.6}
+
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem;gap:1rem;color:var(--gray)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  header{padding:.9rem 1.2rem}
+  .user-name{display:none}
+  main{padding:2rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="accent-bar"></div>
+<header>
+  <a href="index.html" class="header-logo">
+    <img src="Logo%20GECA.png" alt="GECA Creativo"/>
+    <span>Portal Clientes</span>
+  </a>
+  <div class="header-right">
+    <span class="user-name" id="userName">Cargando...</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesi&#243;n</button>
+  </div>
+</header>
+
+<main>
+  <div id="loadingState" class="loading">
+    <div class="spinner"></div>
+    <span style="font-family:'Montserrat',sans-serif;font-size:.85rem;letter-spacing:.06em">Cargando tus informes...</span>
+  </div>
+
+  <div id="mainContent" style="display:none">
+    <div class="welcome-section">
+      <div class="welcome-tag">Bienvenido</div>
+      <h1 class="welcome-title">Tus informes, <span class="empresa-name" id="empresaName"></span></h1>
+      <p class="welcome-sub">Aqu&#237; encuentras todos los informes que GECA Creativo ha generado para ti, organizados por mes. Haz clic en cualquier informe para visualizarlo.</p>
+    </div>
+
+    <div class="filter-row" id="yearFilters">
+      <span class="filter-label">A&#241;o:</span>
+    </div>
+
+    <div id="informesContainer"></div>
+  </div>
+</main>
+
+<script>
+var SUPABASE_URL = 'https://aynfjhepnsidssrxblat.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5bmZqaGVwbnNpZHNzcnhibGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4ODMzODQsImV4cCI6MjA5NzQ1OTM4NH0.-N-cl71RSf4SjxlxiBk9k2m90kTUCVjxfl5rfacwd98';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var todosInformes = [];
+var anioActivo = null;
+
+async function init(){
+  var session = await sb.auth.getSession();
+  if(!session.data.session){
+    window.location.href = 'portal.html'; return;
+  }
+  var user = session.data.session.user;
+
+  // Obtener datos del cliente
+  var clienteRes = await sb.from('clientes').select('*').eq('user_id', user.id).single();
+  var empresa = clienteRes.data ? clienteRes.data.empresa : user.email;
+  document.getElementById('userName').textContent = empresa;
+  document.getElementById('empresaName').textContent = empresa;
+
+  // Obtener informes del cliente
+  var informesRes = await sb.from('informes')
+    .select('*')
+    .eq('cliente_id', clienteRes.data ? clienteRes.data.id : user.id)
+    .order('anio', {ascending:false})
+    .order('mes', {ascending:false});
+
+  todosInformes = informesRes.data || [];
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+
+  renderAnios();
+}
+
+function renderAnios(){
+  var anios = [...new Set(todosInformes.map(function(i){ return i.anio; }))].sort(function(a,b){return b-a});
+  var container = document.getElementById('yearFilters');
+
+  if(anios.length === 0){ renderInformes([]); return; }
+
+  anioActivo = anios[0];
+  anios.forEach(function(anio){
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn' + (anio === anioActivo ? ' active' : '');
+    btn.textContent = anio;
+    btn.onclick = function(){
+      document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      anioActivo = anio;
+      renderInformes(todosInformes.filter(function(i){ return i.anio === anio; }));
+    };
+    container.appendChild(btn);
+  });
+
+  renderInformes(todosInformes.filter(function(i){ return i.anio === anioActivo; }));
+}
+
+function renderInformes(informes){
+  var container = document.getElementById('informesContainer');
+  container.innerHTML = '';
+
+  if(informes.length === 0){
+    container.innerHTML = '<div class="empty-state"><div class="icon">&#128196;</div><p>No hay informes disponibles para este periodo.</p></div>';
+    return;
+  }
+
+  // Agrupar por mes
+  var porMes = {};
+  informes.forEach(function(inf){
+    var m = inf.mes;
+    if(!porMes[m]) porMes[m] = [];
+    porMes[m].push(inf);
+  });
+
+  // Renderizar cada mes (del más reciente al más antiguo)
+  Object.keys(porMes).sort(function(a,b){return b-a}).forEach(function(mes){
+    var lista = porMes[mes];
+    var section = document.createElement('div');
+    section.className = 'month-section';
+
+    var header = document.createElement('div');
+    header.className = 'month-header';
+    header.innerHTML =
+      '<h2 class="month-title">' + MESES[parseInt(mes)-1] + '</h2>' +
+      '<div class="month-line"></div>' +
+      '<span class="month-count">' + lista.length + ' informe' + (lista.length > 1 ? 's' : '') + '</span>';
+    section.appendChild(header);
+
+    var grid = document.createElement('div');
+    grid.className = 'informes-grid';
+
+    lista.forEach(function(inf){
+      var card = document.createElement('a');
+      card.className = 'informe-card';
+      card.href = inf.enlace;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.innerHTML =
+        '<div class="informe-card-top">' +
+          '<div class="informe-icon">&#128202;</div>' +
+          '<span class="informe-badge">' + MESES[parseInt(mes)-1] + ' ' + inf.anio + '</span>' +
+        '</div>' +
+        '<div class="informe-title">' + inf.titulo + '</div>' +
+        (inf.descripcion ? '<div class="informe-desc">' + inf.descripcion + '</div>' : '') +
+        '<div class="informe-footer">' +
+          '<span class="informe-date">Generado por GECA Creativo</span>' +
+          '<span class="informe-link">Ver informe &#8594;</span>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  window.location.href = 'portal.html';
+}
+
+init();
+</script>
+</body>
+</html>
