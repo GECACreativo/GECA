@@ -422,6 +422,9 @@ footer{background:var(--ink);color:rgba(255,255,255,.35);padding:1.8rem clamp(1r
 .footer-logo{height:52px;width:auto;object-fit:contain;filter:none;opacity:1}
 footer strong{color:var(--pink);font-weight:600}
 @media(min-width:768px){footer{justify-content:space-between;text-align:left}}
+.footer-copy-block{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.footer-admin-link{display:inline-flex;align-items:center;gap:.35rem;color:#FF888F;text-decoration:none;font-weight:700}
+.footer-admin-link:hover{text-decoration:underline}
 
 /* Reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
@@ -443,7 +446,7 @@ footer strong{color:var(--pink);font-weight:600}
       <li><a href="#talento">Servicios</a></li>
       <li><a href="#prospectiva">Metodolog&#237;a</a></li>
       <li><a href="#contacto" class="nav-cta-pill">Hablemos &#8594;</a></li>
-      <li><a href="portal.html" class="nav-portal-btn">&#128274; Portal clientes</a></li>
+      <li><a href="portal.html" class="nav-portal-btn" target="_blank" rel="noopener noreferrer">&#128274; Portal clientes</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Abrir men&#250;">
       <span></span><span></span><span></span>
@@ -899,7 +902,10 @@ footer strong{color:var(--pink);font-weight:600}
 <!-- FOOTER -->
 <footer>
   <img class="footer-logo" src="Logo%20GECA.png" alt="GECA Creativo"/>
-  <span>&#169; 2025 <strong>GECA Creativo</strong>. Todos los derechos reservados &#8212; Medell&#237;n, Colombia.</span>
+  <div class="footer-copy-block">
+    <span>&#169; 2025 <strong>GECA Creativo</strong>. Todos los derechos reservados &#8212; Medell&#237;n, Colombia.</span>
+    <a href="admin.html" class="footer-admin-link" target="_blank" rel="noopener noreferrer">&#128274; Portal Administradores</a>
+  </div>
   <span style="opacity:.5;font-size:.7rem">mentescreativas&#64;gecacreativo&#46;com</span>
 </footer>
 
