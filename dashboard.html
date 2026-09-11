@@ -68,6 +68,52 @@ main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
 .informe-date{font-family:'Montserrat',sans-serif;font-size:.7rem;color:var(--gray);letter-spacing:.04em}
 .informe-link{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;color:var(--pink);letter-spacing:.04em;display:flex;align-items:center;gap:.3rem}
 
+/* Tablas (resultados de evaluaciones) */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);padding:.65rem .8rem;text-align:left;border-bottom:2px solid var(--border)}
+td{padding:.75rem .8rem;border-bottom:1px solid var(--border);font-size:.85rem}
+tr:last-child td{border-bottom:none}
+.eval-badge{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:100px}
+.eval-badge-ok{background:rgba(31,87,32,.1);color:var(--green)}
+.eval-badge-pend{background:rgba(0,0,0,.06);color:var(--gray)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin-bottom:1.2rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.2rem;text-align:center}
+.stat-num{font-family:'Montserrat',sans-serif;font-size:1.6rem;font-weight:900;color:var(--blue);line-height:1}
+.stat-label{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin-top:.35rem}
+
+/* Gráfica de barras por categoría */
+.chart-wrap{margin-bottom:1.2rem}
+.chart-title{font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin-bottom:.8rem}
+.chart-bar-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
+.chart-bar-label{width:130px;flex-shrink:0;font-size:.78rem;color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-bar-track{flex:1;height:20px;background:rgba(0,60,126,.08);border-radius:4px;position:relative}
+.chart-bar-fill{height:100%;border-radius:4px;min-width:2px}
+.chart-bar-value{font-size:.76rem;font-weight:700;color:var(--ink);margin-left:.6rem;white-space:nowrap;width:42px;flex-shrink:0}
+
+/* Filtros de participantes */
+.eval-filters{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.eval-filters input,.eval-filters select{font-family:'Open Sans',sans-serif;font-size:.85rem;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .8rem;outline:none}
+.eval-filters input{flex:1;min-width:180px}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:rgba(0,60,126,.04)}
+
+/* Modal de detalle individual */
+.detail-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;overflow-y:auto;padding:2rem 1rem}
+.detail-modal-box{max-width:680px;margin:0 auto;background:var(--cream);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.detail-modal-header{background:var(--ink);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.detail-modal-header span{color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem}
+.detail-modal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:.4rem 1rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer}
+.detail-modal-content{padding:2rem}
+.detail-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem}
+.detail-num{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem}
+.detail-enunciado{font-weight:700;font-size:.9rem;margin-bottom:.8rem;line-height:1.5}
+.detail-opciones{display:flex;flex-direction:column;gap:.4rem}
+.detail-opcion{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.6rem .8rem;font-size:.82rem}
+.detail-feedback{margin-top:.6rem;background:rgba(31,87,32,.08);border:1px solid rgba(31,87,32,.2);border-radius:8px;padding:.6rem .8rem;font-size:.8rem;color:var(--green)}
+
 /* Estado vacío */
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--gray)}
 .empty-state .icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
@@ -109,12 +155,13 @@ main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
     <div class="welcome-section">
       <div class="welcome-tag">Bienvenido</div>
       <h1 class="welcome-title">Hola, <span class="empresa-name" id="empresaName"></span></h1>
-      <p class="welcome-sub">Aqu&#237; encuentras los informes que GECA Creativo ha generado para ti y la biblioteca de recursos de formaci&#243;n, organizados por mes.</p>
+      <p class="welcome-sub">Aqu&#237; encuentras los informes que GECA Creativo ha generado para ti, la biblioteca de recursos de formaci&#243;n, y los resultados de tus evaluaciones.</p>
     </div>
 
     <div class="tab-row">
       <button class="tab-btn active" id="tabInformesBtn" onclick="cambiarTab('informes')">&#128202; Mis Informes</button>
       <button class="tab-btn" id="tabBibliotecaBtn" onclick="cambiarTab('biblioteca')">&#128218; Biblioteca de Recursos</button>
+      <button class="tab-btn" id="tabEvaluacionesBtn" onclick="cambiarTab('evaluaciones')">&#128221; Evaluaciones</button>
     </div>
 
     <div id="vistaInformes">
@@ -130,8 +177,23 @@ main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
       </div>
       <div id="bibliotecaContainer"></div>
     </div>
+
+    <div id="vistaEvaluaciones" style="display:none">
+      <div id="evaluacionesContainer"></div>
+    </div>
   </div>
 </main>
+
+<!-- DETALLE INDIVIDUAL DE UN PARTICIPANTE -->
+<div id="detailModal" class="detail-modal-overlay">
+  <div class="detail-modal-box">
+    <div class="detail-modal-header">
+      <span id="detailModalTitulo"></span>
+      <button class="detail-modal-close" onclick="cerrarDetalleParticipante()">Cerrar &times;</button>
+    </div>
+    <div class="detail-modal-content" id="detailModalContent"></div>
+  </div>
+</div>
 
 <script>
 var SUPABASE_URL = 'https://aynfjhepnsidssrxblat.supabase.co';
@@ -143,6 +205,14 @@ var todosInformes = [];
 var todaBiblioteca = [];
 var anioActivoInformes = null;
 var anioActivoBiblioteca = null;
+
+// Datos de evaluaciones, indexados para armar gráficas, filtros y el detalle individual
+var G_intentosPorId = {};
+var G_preguntasPorEvaluacion = {};
+var G_preguntaPorId = {};
+var G_opcionesPorPregunta = {};
+var G_respuestasPorIntento = {};
+var G_seleccionadasPorRespuesta = {};
 
 async function init(){
   var session = await sb.auth.getSession();
@@ -175,18 +245,260 @@ async function init(){
 
   todaBiblioteca = bibliotecaRes.data || [];
 
+  // Obtener evaluaciones asignadas a este cliente y sus resultados
+  var clienteId = clienteRes.data ? clienteRes.data.id : null;
+  var asigRes = clienteId ? await sb.from('evaluacion_asignaciones')
+    .select('*, evaluaciones(titulo, descripcion, estado)')
+    .eq('cliente_id', clienteId) : {data:[]};
+  var asignaciones = (asigRes.data || []).filter(function(a){ return a.evaluaciones && a.evaluaciones.estado !== 'borrador'; });
+
+  var intentosPorAsignacion = {};
+  if(asignaciones.length){
+    var asigIds = asignaciones.map(function(a){ return a.id; });
+    var intentosRes = await sb.from('evaluacion_intentos').select('*').in('asignacion_id', asigIds).order('enviado_en', {ascending:false});
+    (intentosRes.data || []).forEach(function(i){
+      if(!intentosPorAsignacion[i.asignacion_id]) intentosPorAsignacion[i.asignacion_id] = [];
+      intentosPorAsignacion[i.asignacion_id].push(i);
+      G_intentosPorId[i.id] = i;
+    });
+
+    // Preguntas de esas evaluaciones (para categorías, tipo y detalle)
+    var evalIds = [...new Set(asignaciones.map(function(a){ return a.evaluacion_id; }))];
+    var pregRes = await sb.from('evaluacion_preguntas').select('*').in('evaluacion_id', evalIds).order('orden');
+    var todasPreguntas = pregRes.data || [];
+    todasPreguntas.forEach(function(p){
+      if(!G_preguntasPorEvaluacion[p.evaluacion_id]) G_preguntasPorEvaluacion[p.evaluacion_id] = [];
+      G_preguntasPorEvaluacion[p.evaluacion_id].push(p);
+      G_preguntaPorId[p.id] = p;
+    });
+
+    // Opciones de esas preguntas
+    var preguntaIds = todasPreguntas.map(function(p){ return p.id; });
+    if(preguntaIds.length){
+      var opRes = await sb.from('evaluacion_opciones').select('*').in('pregunta_id', preguntaIds).order('orden');
+      (opRes.data || []).forEach(function(o){
+        if(!G_opcionesPorPregunta[o.pregunta_id]) G_opcionesPorPregunta[o.pregunta_id] = [];
+        G_opcionesPorPregunta[o.pregunta_id].push(o);
+      });
+    }
+
+    // Respuestas de todos los intentos (para la gráfica por categoría y el detalle)
+    var todosIntentoIds = Object.keys(G_intentosPorId);
+    if(todosIntentoIds.length){
+      var respRes = await sb.from('evaluacion_respuestas').select('*').in('intento_id', todosIntentoIds);
+      var respuestas = respRes.data || [];
+      respuestas.forEach(function(r){
+        if(!G_respuestasPorIntento[r.intento_id]) G_respuestasPorIntento[r.intento_id] = [];
+        G_respuestasPorIntento[r.intento_id].push(r);
+      });
+      var respuestaIds = respuestas.map(function(r){ return r.id; });
+      if(respuestaIds.length){
+        var roRes = await sb.from('evaluacion_respuesta_opciones').select('*').in('respuesta_id', respuestaIds);
+        (roRes.data || []).forEach(function(ro){
+          if(!G_seleccionadasPorRespuesta[ro.respuesta_id]) G_seleccionadasPorRespuesta[ro.respuesta_id] = [];
+          G_seleccionadasPorRespuesta[ro.respuesta_id].push(ro.opcion_id);
+        });
+      }
+    }
+  }
+
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 
   renderAniosInformes();
   renderAniosBiblioteca();
+  renderEvaluaciones(asignaciones, intentosPorAsignacion);
+}
+
+var G_intentosPorAsignacion = {};
+
+function renderEvaluaciones(asignaciones, intentosPorAsignacion){
+  var cont = document.getElementById('evaluacionesContainer');
+  G_intentosPorAsignacion = intentosPorAsignacion;
+
+  if(asignaciones.length === 0){
+    cont.innerHTML = '<div class="empty-state"><div class="icon">&#128221;</div><p>No tienes evaluaciones asignadas todav&#237;a.</p></div>';
+    return;
+  }
+
+  var html = '';
+  asignaciones.forEach(function(a){
+    var ev = a.evaluaciones;
+    var intentos = intentosPorAsignacion[a.id] || [];
+    var calificadas = intentos.filter(function(i){ return i.estado === 'calificada'; });
+    var promedio = calificadas.length
+      ? (calificadas.reduce(function(s,i){ return s + (i.puntaje_total||0); }, 0) / calificadas.length).toFixed(1)
+      : '&#8212;';
+
+    html += '<div class="month-section" id="eval-sec-' + a.id + '">';
+    html += '<div class="month-header"><h2 class="month-title">' + ev.titulo + '</h2><div class="month-line"></div>';
+    html += '<span class="month-count">' + intentos.length + ' respuesta' + (intentos.length === 1 ? '' : 's') + '</span></div>';
+
+    if(ev.descripcion){
+      html += '<p style="color:var(--gray);font-size:.85rem;margin-bottom:1rem">' + ev.descripcion + '</p>';
+    }
+
+    if(intentos.length === 0){
+      html += '<p style="color:var(--gray);font-size:.88rem">Todav&#237;a nadie de tu equipo la ha respondido.</p></div>';
+      return;
+    }
+
+    html += '<div class="stats-grid">';
+    html += '<div class="stat-card"><div class="stat-num">' + intentos.length + '</div><div class="stat-label">Personas evaluadas</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">' + (intentos.length - calificadas.length) + '</div><div class="stat-label">Pendientes de calificar</div></div>';
+    html += '<div class="stat-card"><div class="stat-num">' + promedio + '</div><div class="stat-label">Promedio de tu empresa</div></div>';
+    html += '</div>';
+
+    html += renderCategoriaChart(a, calificadas);
+
+    html += '<div class="eval-filters">';
+    html += '<input type="text" placeholder="Buscar por nombre o correo..." oninput="filtrarParticipantes(\'' + a.id + '\')" id="buscar-' + a.id + '"/>';
+    html += '<select onchange="filtrarParticipantes(\'' + a.id + '\')" id="estado-' + a.id + '">';
+    html += '<option value="">Todos los estados</option><option value="calificada">Calificadas</option><option value="pendiente_calificacion">Pendientes</option>';
+    html += '</select>';
+    html += '</div>';
+
+    html += '<div id="tabla-' + a.id + '"></div>';
+    html += '</div>';
+  });
+
+  cont.innerHTML = html;
+
+  asignaciones.forEach(function(a){
+    if((intentosPorAsignacion[a.id] || []).length){
+      renderTablaParticipantes(a.id, intentosPorAsignacion[a.id]);
+    }
+  });
+}
+
+function renderCategoriaChart(asignacion, calificadas){
+  if(calificadas.length === 0) return '';
+
+  var totales = {};
+  var orden = [];
+
+  calificadas.forEach(function(intento){
+    var respuestas = G_respuestasPorIntento[intento.id] || [];
+    respuestas.forEach(function(r){
+      var p = G_preguntaPorId[r.pregunta_id];
+      if(!p) return;
+      var cat = (p.categoria || '').trim() || 'Sin categoría';
+      if(!totales[cat]){ totales[cat] = {obtenido:0, posible:0}; orden.push(cat); }
+      totales[cat].obtenido += (r.puntaje_obtenido || 0);
+      totales[cat].posible += (p.peso || 0);
+    });
+  });
+
+  if(orden.length <= 1) return '';
+
+  var html = '<div class="chart-wrap"><div class="chart-title">Promedio por categor&#237;a</div>';
+  orden.forEach(function(cat){
+    var t = totales[cat];
+    var pct = t.posible > 0 ? Math.round((t.obtenido / t.posible) * 100) : 0;
+    var color = pct >= 70 ? 'var(--green)' : (pct >= 40 ? 'var(--orange)' : '#c02535');
+    html += '<div class="chart-bar-row">';
+    html += '<div class="chart-bar-label" title="' + cat + '">' + cat + '</div>';
+    html += '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+    html += '<div class="chart-bar-value">' + pct + '%</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function filtrarParticipantes(asignacionId){
+  renderTablaParticipantes(asignacionId, G_intentosPorAsignacion[asignacionId] || []);
+}
+
+function renderTablaParticipantes(asignacionId, intentos){
+  var buscar = (document.getElementById('buscar-' + asignacionId).value || '').toLowerCase().trim();
+  var estadoFiltro = document.getElementById('estado-' + asignacionId).value;
+
+  var filtrados = intentos.filter(function(i){
+    var coincideBusqueda = !buscar || i.nombre.toLowerCase().indexOf(buscar) !== -1 || i.correo.toLowerCase().indexOf(buscar) !== -1;
+    var coincideEstado = !estadoFiltro || i.estado === estadoFiltro;
+    return coincideBusqueda && coincideEstado;
+  });
+
+  var cont = document.getElementById('tabla-' + asignacionId);
+  if(filtrados.length === 0){
+    cont.innerHTML = '<p class="empty" style="padding:2rem;text-align:center;color:var(--gray);font-family:\'Montserrat\',sans-serif;font-size:.85rem">Ning&#250;n resultado coincide con el filtro.</p>';
+    return;
+  }
+
+  var html = '<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Puntaje</th><th>Estado</th></tr></thead><tbody>';
+  filtrados.forEach(function(i){
+    html += '<tr class="clickable" onclick="abrirDetalleParticipante(\'' + i.id + '\')"><td>' + i.nombre + '</td><td style="color:var(--gray)">' + i.correo + '</td>';
+    html += '<td>' + (i.puntaje_total !== null ? i.puntaje_total : '&#8212;') + '</td>';
+    html += '<td><span class="eval-badge ' + (i.estado === 'calificada' ? 'eval-badge-ok' : 'eval-badge-pend') + '">' + (i.estado === 'calificada' ? 'Calificada' : 'Pendiente') + '</span></td></tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
+}
+
+function abrirDetalleParticipante(intentoId){
+  var intento = G_intentosPorId[intentoId];
+  if(!intento) return;
+
+  document.getElementById('detailModalTitulo').textContent = intento.nombre + ' · ' + intento.correo;
+
+  var respuestas = (G_respuestasPorIntento[intentoId] || []).slice().sort(function(a,b){
+    var pa = G_preguntaPorId[a.pregunta_id], pb = G_preguntaPorId[b.pregunta_id];
+    return (pa ? pa.orden : 0) - (pb ? pb.orden : 0);
+  });
+
+  var html = '';
+  if(respuestas.length === 0){
+    html = '<p style="padding:2rem;text-align:center;color:var(--gray);font-family:\'Montserrat\',sans-serif;font-size:.85rem">No hay respuestas registradas para esta persona.</p>';
+  }
+
+  respuestas.forEach(function(r){
+    var p = G_preguntaPorId[r.pregunta_id];
+    if(!p) return;
+    html += '<div class="detail-card">';
+    html += '<div class="detail-num">' + p.peso + ' pts' + (p.categoria ? ' &middot; ' + p.categoria : '') + '</div>';
+    html += '<div class="detail-enunciado">' + p.enunciado + '</div>';
+
+    if(p.tipo === 'abierta'){
+      html += '<div class="detail-opcion">' + (r.respuesta_texto ? r.respuesta_texto : '<em>(sin respuesta)</em>') + '</div>';
+      html += '<p style="margin-top:.6rem;font-size:.8rem;color:var(--gray)">Puntaje: <strong>' + (r.puntaje_obtenido !== null ? r.puntaje_obtenido : 'Pendiente') + ' / ' + p.peso + '</strong></p>';
+      if(r.retroalimentacion){
+        html += '<div class="detail-feedback">&#128172; ' + r.retroalimentacion + '</div>';
+      }
+    } else {
+      var seleccionadas = G_seleccionadasPorRespuesta[r.id] || [];
+      var opciones = G_opcionesPorPregunta[p.id] || [];
+      var esCorrecta = r.puntaje_obtenido !== null && r.puntaje_obtenido >= p.peso;
+      html += '<div class="detail-opciones">';
+      opciones.forEach(function(o){
+        var marcada = seleccionadas.indexOf(o.id) !== -1;
+        var color = o.es_correcta ? 'var(--green)' : (marcada ? '#c02535' : 'var(--ink)');
+        html += '<div class="detail-opcion" style="color:' + color + '">' + (marcada ? '&#9679;' : '&#9675;') + ' ' + o.texto + (o.es_correcta ? ' <strong style="color:var(--green)">&#10003;</strong>' : '') + '</div>';
+      });
+      html += '</div>';
+      html += '<p style="margin-top:.6rem;font-size:.8rem;color:var(--gray)">Puntaje: <strong>' + (r.puntaje_obtenido || 0) + ' / ' + p.peso + '</strong></p>';
+      if(esCorrecta && p.retroalimentacion){
+        html += '<div class="detail-feedback">&#128172; ' + p.retroalimentacion + '</div>';
+      }
+    }
+    html += '</div>';
+  });
+
+  document.getElementById('detailModalContent').innerHTML = html;
+  document.getElementById('detailModal').style.display = 'block';
+}
+
+function cerrarDetalleParticipante(){
+  document.getElementById('detailModal').style.display = 'none';
 }
 
 function cambiarTab(tab){
   document.getElementById('tabInformesBtn').classList.toggle('active', tab==='informes');
   document.getElementById('tabBibliotecaBtn').classList.toggle('active', tab==='biblioteca');
+  document.getElementById('tabEvaluacionesBtn').classList.toggle('active', tab==='evaluaciones');
   document.getElementById('vistaInformes').style.display = tab==='informes' ? 'block' : 'none';
   document.getElementById('vistaBiblioteca').style.display = tab==='biblioteca' ? 'block' : 'none';
+  document.getElementById('vistaEvaluaciones').style.display = tab==='evaluaciones' ? 'block' : 'none';
 }
 
 function renderAniosInformes(){

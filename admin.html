@@ -65,6 +65,35 @@ header{background:var(--ink);padding:1rem 2rem;display:flex;align-items:center;j
 .btn-secondary{background:rgba(0,0,0,.05);color:var(--gray);border:1px solid var(--border);border-radius:100px;padding:.75rem 1.8rem;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s;margin-left:.6rem}
 .btn-secondary:hover{background:rgba(0,0,0,.1)}
 .edit-banner{color:var(--blue);font-weight:600;font-size:.85rem;margin-bottom:1rem;display:none}
+.pregunta-block{border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem;background:var(--cream)}
+.pregunta-block-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.opcion-row{display:flex;gap:.6rem;align-items:center;margin-bottom:.5rem}
+.opcion-row input[type="text"]{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .7rem;font-family:'Open Sans',sans-serif;font-size:.85rem;outline:none}
+.fg input[type="checkbox"],.fg input[type="radio"]{-webkit-appearance:none;appearance:none;width:20px;height:20px;flex:none;margin:0;background:var(--white);border:2px solid var(--blue);cursor:pointer;position:relative}
+.fg input[type="checkbox"]{border-radius:4px}
+.fg input[type="radio"]{border-radius:50%}
+.fg input[type="checkbox"]:checked,.fg input[type="radio"]:checked{background:var(--blue)}
+.fg input[type="checkbox"]:checked::after{content:'\2713';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--white);font-size:13px;font-weight:bold;line-height:1}
+.fg input[type="radio"]:checked::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;background:var(--white);border-radius:50%}
+.opcion-row .btn-danger{padding:.35rem .6rem}
+.peso-indicador{font-weight:400;font-size:.78rem;color:var(--gray)}
+.estado-badge{font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:100px}
+.estado-borrador{background:rgba(0,0,0,.06);color:var(--gray)}
+.estado-publicada{background:rgba(31,87,32,.1);color:var(--green)}
+.estado-cerrada{background:rgba(255,136,143,.12);color:#c02535}
+.link-input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:.45rem .7rem;font-size:.78rem;font-family:monospace}
+.preview-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1rem}
+.preview-num{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.preview-enunciado{font-weight:700;font-size:.95rem;margin-bottom:1rem;line-height:1.5}
+.preview-opciones{display:flex;flex-direction:column;gap:.5rem}
+.preview-opcion{display:flex;align-items:center;gap:.6rem;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.65rem .8rem;font-size:.85rem}
+.preview-input{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.7rem .9rem;font-family:'Open Sans',sans-serif;font-size:.85rem;resize:none}
+.preview-opcion input[type="checkbox"],.preview-opcion input[type="radio"]{-webkit-appearance:none;appearance:none;width:18px;height:18px;flex:none;margin:0;background:var(--white);border:2px solid var(--blue);position:relative}
+.preview-opcion input[type="checkbox"]{border-radius:4px}
+.preview-opcion input[type="radio"]{border-radius:50%}
+.preview-opcion input:checked{background:var(--blue)}
+.preview-opcion input[type="checkbox"]:checked::after{content:'\2713';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--white);font-size:11px;font-weight:bold;line-height:1}
+.preview-opcion input[type="radio"]:checked::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;background:var(--white);border-radius:50%}
 .btn-danger:hover{background:rgba(255,136,143,.2)}
 
 /* Tablas */
@@ -230,6 +259,7 @@ tr:hover td{background:rgba(0,60,126,.02)}
     <div class="nav-item" data-page="informes" onclick="showPage('informes')"><span class="nav-icon">&#128196;</span> Informes</div>
     <div class="nav-item" data-page="nuevo-informe" onclick="showPage('nuevo-informe')"><span class="nav-icon">&#43;</span> Agregar Informe</div>
     <div class="nav-item" data-page="biblioteca" onclick="showPage('biblioteca')"><span class="nav-icon">&#128218;</span> Biblioteca de Recursos</div>
+    <div class="nav-item" data-page="evaluaciones" onclick="showPage('evaluaciones')"><span class="nav-icon">&#128221;</span> Centro de Evaluaci&#243;n</div>
   </nav>
 
   <!-- CONTENT -->
@@ -431,10 +461,123 @@ tr:hover td{background:rgba(0,60,126,.02)}
       </div>
     </div>
 
+    <!-- CENTRO DE EVALUACIÓN -->
+    <div class="page" id="page-evaluaciones">
+      <h1 class="page-title">Centro de Evaluaci&#243;n</h1>
+      <p class="page-sub">Crea evaluaciones de conocimiento y as&#237;gnalas a tus clientes.</p>
+
+      <div id="evalListaView">
+        <div class="card">
+          <div class="card-title">Evaluaciones</div>
+          <button class="btn-primary" style="margin-bottom:1.5rem" onclick="nuevaEvaluacion()">&#43; Nueva evaluaci&#243;n</button>
+          <div id="tablaEvaluaciones"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <div id="evalBuilderView" style="display:none">
+        <div class="card">
+          <div class="card-title" id="builderTitle">Nueva evaluaci&#243;n</div>
+          <div class="form-row">
+            <div class="fg">
+              <label>T&#237;tulo</label>
+              <input type="text" id="ev-titulo" placeholder="Ej: Evaluaci&#243;n de Liderazgo &#8212; M&#243;dulo 1"/>
+            </div>
+            <div class="fg">
+              <label>Estado</label>
+              <select id="ev-estado">
+                <option value="borrador">Borrador (no visible por enlace)</option>
+                <option value="publicada">Publicada (enlaces activos)</option>
+                <option value="cerrada">Cerrada (ya no recibe respuestas)</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Descripci&#243;n (opcional)</label>
+            <textarea id="ev-descripcion" rows="2" placeholder="Instrucciones o contexto para quien la presenta..."></textarea>
+          </div>
+          <div class="fg">
+            <label style="display:flex;align-items:center;gap:.5rem;text-transform:none;font-size:.85rem">
+              <input type="checkbox" id="ev-ponderacion-auto" checked onchange="actualizarPesoTotal()" style="width:auto"/>
+              Ponderaci&#243;n autom&#225;tica (repartir 100 puntos entre las preguntas)
+            </label>
+          </div>
+          <div class="fg">
+            <label style="display:flex;align-items:center;gap:.5rem;text-transform:none;font-size:.85rem">
+              <input type="checkbox" id="ev-msg-personalizado-check" onchange="toggleMensajePersonalizado()" style="width:auto"/>
+              Personalizar mensaje de agradecimiento final
+            </label>
+          </div>
+          <div class="fg" id="ev-msg-personalizado-wrap" style="display:none">
+            <label>Mensaje personalizado</label>
+            <textarea id="ev-msg-personalizado" rows="2" placeholder="Ej: ¡Gracias por completar la evaluación de Liderazgo! Nos pondremos en contacto pronto."></textarea>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Preguntas <span class="peso-indicador" id="pesoTotalIndicador"></span></div>
+          <div id="preguntasContainer"></div>
+          <button class="btn-edit" style="padding:.6rem 1.2rem" onclick="agregarPreguntaBuilder()">&#43; Agregar pregunta</button>
+        </div>
+
+        <button class="btn-primary" onclick="guardarEvaluacion()">Guardar evaluaci&#243;n</button>
+        <button class="btn-secondary" onclick="previsualizarBuilder()">&#128065; Vista previa</button>
+        <button class="btn-secondary" onclick="cerrarBuilder()">Cancelar</button>
+      </div>
+
+      <div id="evalAsignarView" style="display:none">
+        <div class="card">
+          <div class="card-title">Asignar &#171;<span id="asignarEvalTitulo"></span>&#187; a clientes</div>
+          <div id="asignarClientesLista"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Enlaces generados</div>
+          <div id="enlacesGenerados"></div>
+        </div>
+        <button class="btn-secondary" style="margin-left:0" onclick="cerrarAsignar()">&#8592; Volver a evaluaciones</button>
+      </div>
+
+      <div id="evalResultadosView" style="display:none">
+        <div class="card">
+          <div class="card-title">Resultados &#171;<span id="resultadosEvalTitulo"></span>&#187;</div>
+          <div class="stats-grid" id="resultadosStats"></div>
+        </div>
+        <div class="card">
+          <div id="tablaResultados"><div class="spinner"></div></div>
+        </div>
+        <button class="btn-secondary" style="margin-left:0" onclick="cerrarResultados()">&#8592; Volver a evaluaciones</button>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /layout -->
 
 <div class="toast" id="toast"></div>
+
+<!-- VISTA PREVIA DE EVALUACIÓN -->
+<div id="previewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;overflow-y:auto;padding:2rem 1rem">
+  <div style="max-width:680px;margin:0 auto;background:var(--cream);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="background:var(--ink);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem">
+      <span style="color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem">&#128065; Vista previa &#8212; as&#237; la ver&#225; quien la responda</span>
+      <button class="btn-secondary" style="margin:0;padding:.4rem 1rem;flex-shrink:0" onclick="cerrarPreview()">Cerrar &times;</button>
+    </div>
+    <div style="padding:2rem">
+      <h2 id="previewTitulo" style="font-family:'Montserrat',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.4rem"></h2>
+      <p id="previewDescripcion" style="color:var(--gray);font-size:.88rem;margin-bottom:1.5rem"></p>
+      <div id="previewContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DETALLE / CALIFICACIÓN DE UN INTENTO -->
+<div id="gradeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;overflow-y:auto;padding:2rem 1rem">
+  <div style="max-width:680px;margin:0 auto;background:var(--cream);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="background:var(--ink);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem">
+      <span style="color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem" id="gradeModalTitulo"></span>
+      <button class="btn-secondary" style="margin:0;padding:.4rem 1rem;flex-shrink:0" onclick="cerrarDetalleIntento()">Cerrar &times;</button>
+    </div>
+    <div style="padding:2rem" id="gradeModalContent"></div>
+  </div>
+</div>
 
 <script>
 var SUPABASE_URL = 'https://aynfjhepnsidssrxblat.supabase.co';
@@ -446,6 +589,9 @@ var bibliotecaCache = [];
 var editingClienteId = null;
 var editingInformeId = null;
 var editingRecursoId = null;
+var editingEvaluacionId = null;
+var asignandoEvaluacionId = null;
+var builderPreguntas = [];
 
 async function adminLogin(){
   var email = document.getElementById('al-email').value.trim();
@@ -581,6 +727,556 @@ async function cargarBibliotecaTabla(){
   });
   html+='</tbody></table></div>';
   cont.innerHTML=html;
+}
+
+/* ══════════════ CENTRO DE EVALUACIÓN ══════════════ */
+
+function showEvalView(v){
+  document.getElementById('evalListaView').style.display = v==='lista' ? 'block' : 'none';
+  document.getElementById('evalBuilderView').style.display = v==='builder' ? 'block' : 'none';
+  document.getElementById('evalAsignarView').style.display = v==='asignar' ? 'block' : 'none';
+  document.getElementById('evalResultadosView').style.display = v==='resultados' ? 'block' : 'none';
+}
+
+async function cargarEvaluaciones(){
+  var cont = document.getElementById('tablaEvaluaciones');
+  cont.innerHTML = '<div class="spinner"></div>';
+  var r = await sb.from('evaluaciones')
+    .select('*, evaluacion_preguntas(count), evaluacion_asignaciones(count)')
+    .order('created_at', {ascending:false});
+  var data = r.data || [];
+  if(data.length === 0){ cont.innerHTML = '<p class="empty">A&#250;n no has creado evaluaciones.</p>'; return; }
+  var html = '<div class="table-wrap"><table><thead><tr><th>T&#237;tulo</th><th>Estado</th><th>Preguntas</th><th>Clientes asignados</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  data.forEach(function(e){
+    var nPreguntas = (e.evaluacion_preguntas && e.evaluacion_preguntas[0]) ? e.evaluacion_preguntas[0].count : 0;
+    var nAsignados = (e.evaluacion_asignaciones && e.evaluacion_asignaciones[0]) ? e.evaluacion_asignaciones[0].count : 0;
+    html += '<tr><td><strong>' + e.titulo + '</strong></td>';
+    html += '<td><span class="estado-badge estado-' + e.estado + '">' + e.estado + '</span></td>';
+    html += '<td>' + nPreguntas + '</td><td>' + nAsignados + '</td>';
+    html += '<td>';
+    html += '<button class="btn-edit" onclick="previsualizarEvaluacionGuardada(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">&#128065; Vista previa</button>';
+    if(e.estado === 'borrador'){
+      html += '<button class="btn-edit" onclick="editarEvaluacion(\'' + e.id + '\')">Editar</button>';
+      html += '<button class="btn-edit" onclick="cambiarEstadoEvaluacion(\'' + e.id + '\',\'publicada\')">Publicar</button>';
+    }
+    if(e.estado === 'publicada'){
+      html += '<button class="btn-edit" onclick="abrirAsignar(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Asignar / enlaces</button>';
+      html += '<button class="btn-edit" onclick="abrirResultados(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Resultados</button>';
+      html += '<button class="btn-edit" onclick="cambiarEstadoEvaluacion(\'' + e.id + '\',\'cerrada\')">Cerrar</button>';
+    }
+    if(e.estado === 'cerrada'){
+      html += '<button class="btn-edit" onclick="abrirAsignar(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Ver enlaces</button>';
+      html += '<button class="btn-edit" onclick="abrirResultados(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Resultados</button>';
+    }
+    html += '<button class="btn-danger" onclick="eliminarEvaluacion(\'' + e.id + '\')">Eliminar</button>';
+    html += '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
+}
+
+async function cambiarEstadoEvaluacion(id, nuevoEstado){
+  var r = await sb.from('evaluaciones').update({estado:nuevoEstado}).eq('id', id);
+  if(r.error){ toast('Error: ' + r.error.message, 'error'); return; }
+  toast('Evaluación actualizada a "' + nuevoEstado + '".');
+  cargarEvaluaciones();
+}
+
+async function eliminarEvaluacion(id){
+  if(!confirm('¿Eliminar esta evaluación y todos sus resultados? Esta acción no se puede deshacer.')) return;
+  await sb.from('evaluaciones').delete().eq('id', id);
+  toast('Evaluación eliminada.');
+  cargarEvaluaciones();
+}
+
+function toggleMensajePersonalizado(){
+  var check = document.getElementById('ev-msg-personalizado-check');
+  document.getElementById('ev-msg-personalizado-wrap').style.display = check.checked ? 'block' : 'none';
+}
+
+function nuevaEvaluacion(){
+  editingEvaluacionId = null;
+  builderPreguntas = [];
+  document.getElementById('ev-titulo').value = '';
+  document.getElementById('ev-descripcion').value = '';
+  document.getElementById('ev-estado').value = 'borrador';
+  document.getElementById('ev-ponderacion-auto').checked = true;
+  document.getElementById('ev-msg-personalizado-check').checked = false;
+  document.getElementById('ev-msg-personalizado').value = '';
+  toggleMensajePersonalizado();
+  document.getElementById('builderTitle').textContent = 'Nueva evaluación';
+  showEvalView('builder');
+  agregarPreguntaBuilder();
+}
+
+async function editarEvaluacion(id){
+  var evalRes = await sb.from('evaluaciones').select('*').eq('id', id).single();
+  if(evalRes.error || !evalRes.data) return;
+  if(evalRes.data.estado !== 'borrador'){ toast('Solo se pueden editar evaluaciones en borrador.','error'); return; }
+  var pregRes = await sb.from('evaluacion_preguntas').select('*, evaluacion_opciones(*)').eq('evaluacion_id', id).order('orden');
+
+  editingEvaluacionId = id;
+  document.getElementById('ev-titulo').value = evalRes.data.titulo;
+  document.getElementById('ev-descripcion').value = evalRes.data.descripcion || '';
+  document.getElementById('ev-estado').value = evalRes.data.estado;
+  document.getElementById('ev-ponderacion-auto').checked = evalRes.data.ponderacion_automatica;
+  document.getElementById('ev-msg-personalizado-check').checked = evalRes.data.usar_mensaje_personalizado;
+  document.getElementById('ev-msg-personalizado').value = evalRes.data.mensaje_personalizado || '';
+  toggleMensajePersonalizado();
+
+  builderPreguntas = (pregRes.data || []).map(function(p){
+    return {
+      tipo: p.tipo,
+      enunciado: p.enunciado,
+      peso: p.peso,
+      categoria: p.categoria || '',
+      retroalimentacion: p.retroalimentacion || '',
+      opciones: (p.evaluacion_opciones || []).slice().sort(function(a,b){ return a.orden - b.orden; }).map(function(o){
+        return {texto:o.texto, es_correcta:o.es_correcta};
+      })
+    };
+  });
+
+  document.getElementById('builderTitle').textContent = 'Editar evaluación';
+  showEvalView('builder');
+  renderPreguntasBuilder();
+}
+
+function cerrarBuilder(){
+  showEvalView('lista');
+  cargarEvaluaciones();
+}
+
+function syncBuilderFromDOM(){
+  document.querySelectorAll('.pregunta-block').forEach(function(block, i){
+    var p = builderPreguntas[i];
+    if(!p) return;
+    p.enunciado = block.querySelector('.p-enunciado').value;
+    var categoriaInput = block.querySelector('.p-categoria');
+    if(categoriaInput) p.categoria = categoriaInput.value;
+    var pesoInput = block.querySelector('.p-peso');
+    if(pesoInput && !pesoInput.disabled) p.peso = parseFloat(pesoInput.value) || 0;
+    if(p.tipo !== 'abierta'){
+      block.querySelectorAll('.opcion-row').forEach(function(row, j){
+        if(p.opciones[j]) p.opciones[j].texto = row.querySelector('.o-texto').value;
+      });
+      var retroInput = block.querySelector('.p-retro');
+      if(retroInput) p.retroalimentacion = retroInput.value;
+    }
+  });
+}
+
+function agregarPreguntaBuilder(){
+  syncBuilderFromDOM();
+  builderPreguntas.push({tipo:'opcion_unica', enunciado:'', peso:0, categoria:'', retroalimentacion:'', opciones:[{texto:'',es_correcta:false},{texto:'',es_correcta:false}]});
+  renderPreguntasBuilder();
+}
+
+function quitarPregunta(i){
+  syncBuilderFromDOM();
+  builderPreguntas.splice(i, 1);
+  renderPreguntasBuilder();
+}
+
+function cambiarTipoPregunta(i, tipo){
+  syncBuilderFromDOM();
+  builderPreguntas[i].tipo = tipo;
+  if(tipo !== 'abierta' && builderPreguntas[i].opciones.length === 0){
+    builderPreguntas[i].opciones = [{texto:'',es_correcta:false},{texto:'',es_correcta:false}];
+  }
+  renderPreguntasBuilder();
+}
+
+function agregarOpcion(i){
+  syncBuilderFromDOM();
+  builderPreguntas[i].opciones.push({texto:'', es_correcta:false});
+  renderPreguntasBuilder();
+}
+
+function quitarOpcion(i, j){
+  syncBuilderFromDOM();
+  builderPreguntas[i].opciones.splice(j, 1);
+  renderPreguntasBuilder();
+}
+
+function marcarCorrecta(i, j, el){
+  syncBuilderFromDOM();
+  if(builderPreguntas[i].tipo === 'opcion_unica'){
+    builderPreguntas[i].opciones.forEach(function(o){ o.es_correcta = false; });
+  }
+  builderPreguntas[i].opciones[j].es_correcta = el.checked;
+}
+
+var TIPO_LABELS = {abierta:'Respuesta abierta', opcion_unica:'Opción única', opcion_multiple:'Selección múltiple'};
+
+function renderPreguntasBuilder(){
+  var cont = document.getElementById('preguntasContainer');
+  var html = '';
+  builderPreguntas.forEach(function(p, i){
+    html += '<div class="pregunta-block">';
+    html += '<div class="pregunta-block-head"><strong>Pregunta ' + (i+1) + '</strong><button class="btn-danger" onclick="quitarPregunta(' + i + ')">Quitar</button></div>';
+    html += '<div class="form-row">';
+    html += '<div class="fg"><label>Tipo</label><select class="p-tipo" onchange="cambiarTipoPregunta(' + i + ', this.value)">';
+    ['abierta','opcion_unica','opcion_multiple'].forEach(function(t){
+      html += '<option value="' + t + '"' + (p.tipo===t ? ' selected' : '') + '>' + TIPO_LABELS[t] + '</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="fg"><label>Peso (puntos)</label><input type="number" class="p-peso" min="0" step="0.5" value="' + p.peso + '" oninput="actualizarPesoTotal()"/></div>';
+    html += '</div>';
+    html += '<div class="fg"><label>Enunciado</label><textarea class="p-enunciado" rows="2" placeholder="Escribe la pregunta...">' + (p.enunciado||'') + '</textarea></div>';
+    html += '<div class="fg"><label>Categor&#237;a (opcional)</label><input type="text" class="p-categoria" value="' + (p.categoria||'').replace(/"/g,'&quot;') + '" placeholder="Ej: Liderazgo, Comunicaci&#243;n..."/></div>';
+    if(p.tipo !== 'abierta'){
+      html += '<div class="fg"><label>Opciones (marca la' + (p.tipo==='opcion_multiple'?'s':'') + ' correcta' + (p.tipo==='opcion_multiple'?'s':'') + ')</label>';
+      p.opciones.forEach(function(o, j){
+        html += '<div class="opcion-row">';
+        html += '<input type="' + (p.tipo==='opcion_unica'?'radio':'checkbox') + '" name="correcta-' + i + '" ' + (o.es_correcta?'checked':'') + ' onchange="marcarCorrecta(' + i + ',' + j + ', this)"/>';
+        html += '<input type="text" class="o-texto" value="' + (o.texto||'').replace(/"/g,'&quot;') + '" placeholder="Texto de la opción"/>';
+        html += '<button class="btn-danger" onclick="quitarOpcion(' + i + ',' + j + ')">&times;</button>';
+        html += '</div>';
+      });
+      html += '<button class="btn-edit" onclick="agregarOpcion(' + i + ')">&#43; Agregar opción</button></div>';
+      html += '<div class="fg"><label>Retroalimentaci&#243;n si responde correctamente (opcional)</label><textarea class="p-retro" rows="2" placeholder="Ej: ¡Correcto! Esa es la actitud clave para liderar equipos.">' + (p.retroalimentacion||'') + '</textarea></div>';
+    }
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+  actualizarPesoTotal();
+}
+
+function actualizarPesoTotal(){
+  var auto = document.getElementById('ev-ponderacion-auto');
+  var n = document.querySelectorAll('.pregunta-block').length;
+  var indicador = document.getElementById('pesoTotalIndicador');
+  var pesoInputs = document.querySelectorAll('.p-peso');
+  if(auto.checked){
+    var pesoIgual = n > 0 ? Math.round((100/n) * 100) / 100 : 0;
+    pesoInputs.forEach(function(inp){ inp.value = pesoIgual; inp.disabled = true; });
+    indicador.textContent = '· ' + n + ' pregunta' + (n===1?'':'s') + ' × ' + pesoIgual + ' pts = 100 pts';
+  } else {
+    var suma = 0;
+    pesoInputs.forEach(function(inp){ inp.disabled = false; suma += parseFloat(inp.value) || 0; });
+    indicador.textContent = '· Suma de pesos: ' + suma + (suma !== 100 ? ' (recomendado: 100)' : '');
+  }
+}
+
+async function guardarEvaluacion(){
+  syncBuilderFromDOM();
+  var titulo = document.getElementById('ev-titulo').value.trim();
+  var descripcion = document.getElementById('ev-descripcion').value.trim();
+  var estado = document.getElementById('ev-estado').value;
+  var ponderacionAuto = document.getElementById('ev-ponderacion-auto').checked;
+  var usarMsgPersonalizado = document.getElementById('ev-msg-personalizado-check').checked;
+  var msgPersonalizado = document.getElementById('ev-msg-personalizado').value.trim();
+
+  if(!titulo){ toast('El título es obligatorio.','error'); return; }
+  if(usarMsgPersonalizado && !msgPersonalizado){ toast('Escribe el mensaje personalizado o desactiva esa opción.','error'); return; }
+  if(builderPreguntas.length === 0){ toast('Agrega al menos una pregunta.','error'); return; }
+  for(var idx=0; idx<builderPreguntas.length; idx++){
+    var p = builderPreguntas[idx];
+    if(!p.enunciado.trim()){ toast('La pregunta ' + (idx+1) + ' necesita un enunciado.','error'); return; }
+    if(p.tipo !== 'abierta'){
+      if(p.opciones.length < 2){ toast('La pregunta ' + (idx+1) + ' necesita al menos 2 opciones.','error'); return; }
+      if(!p.opciones.some(function(o){ return o.es_correcta; })){ toast('Marca la opción correcta en la pregunta ' + (idx+1) + '.','error'); return; }
+      if(p.opciones.some(function(o){ return !o.texto.trim(); })){ toast('Completa el texto de todas las opciones en la pregunta ' + (idx+1) + '.','error'); return; }
+    }
+  }
+
+  if(ponderacionAuto){
+    var pesoIgual = Math.round((100 / builderPreguntas.length) * 100) / 100;
+    builderPreguntas.forEach(function(p){ p.peso = pesoIgual; });
+  }
+
+  var evalPayload = {titulo:titulo, descripcion:descripcion, estado:estado, ponderacion_automatica:ponderacionAuto, usar_mensaje_personalizado:usarMsgPersonalizado, mensaje_personalizado:usarMsgPersonalizado ? msgPersonalizado : null};
+
+  var evalId = editingEvaluacionId;
+  if(evalId){
+    var updR = await sb.from('evaluaciones').update(evalPayload).eq('id', evalId);
+    if(updR.error){ toast('Error al actualizar: ' + updR.error.message,'error'); return; }
+    await sb.from('evaluacion_preguntas').delete().eq('evaluacion_id', evalId);
+  } else {
+    var insEval = await sb.from('evaluaciones').insert(evalPayload).select().single();
+    if(insEval.error){ toast('Error al crear evaluación: ' + insEval.error.message,'error'); return; }
+    evalId = insEval.data.id;
+  }
+
+  for(var i=0; i<builderPreguntas.length; i++){
+    var pr = builderPreguntas[i];
+    var pregPayload = {evaluacion_id:evalId, orden:i, tipo:pr.tipo, enunciado:pr.enunciado.trim(), peso:pr.peso, categoria:(pr.categoria||'').trim() || null};
+    if(pr.tipo !== 'abierta') pregPayload.retroalimentacion = (pr.retroalimentacion||'').trim() || null;
+    var insP = await sb.from('evaluacion_preguntas').insert(pregPayload).select().single();
+    if(insP.error){ toast('Error al guardar la pregunta ' + (i+1) + ': ' + insP.error.message,'error'); return; }
+    if(pr.tipo !== 'abierta'){
+      var opcionesPayload = pr.opciones.map(function(o, j){ return {pregunta_id:insP.data.id, texto:o.texto.trim(), es_correcta:o.es_correcta, orden:j}; });
+      var insO = await sb.from('evaluacion_opciones').insert(opcionesPayload);
+      if(insO.error){ toast('Error al guardar opciones: ' + insO.error.message,'error'); return; }
+    }
+  }
+
+  toast('Evaluación guardada correctamente.');
+  cerrarBuilder();
+}
+
+async function abrirAsignar(evalId, titulo){
+  asignandoEvaluacionId = evalId;
+  document.getElementById('asignarEvalTitulo').textContent = titulo;
+  showEvalView('asignar');
+  await cargarAsignaciones();
+}
+
+function cerrarAsignar(){
+  showEvalView('lista');
+  cargarEvaluaciones();
+}
+
+function renderPreviewPreguntas(preguntas){
+  if(!preguntas || preguntas.length === 0) return '<p class="empty">Esta evaluación todavía no tiene preguntas.</p>';
+  var html = '';
+  preguntas.forEach(function(p, i){
+    html += '<div class="preview-card">';
+    html += '<div class="preview-num">Pregunta ' + (i+1) + ' de ' + preguntas.length + ' · ' + (p.peso||0) + ' pts</div>';
+    html += '<div class="preview-enunciado">' + (p.enunciado || '(sin enunciado)') + '</div>';
+    if(p.tipo === 'abierta'){
+      html += '<textarea class="preview-input" rows="3" placeholder="Respuesta abierta (calificación manual)" disabled></textarea>';
+    } else {
+      html += '<div class="preview-opciones">';
+      (p.opciones || []).forEach(function(o){
+        html += '<label class="preview-opcion"><input type="' + (p.tipo==='opcion_unica' ? 'radio' : 'checkbox') + '" disabled ' + (o.es_correcta ? 'checked' : '') + '/> ' + (o.texto || '(sin texto)') + (o.es_correcta ? ' <span style="color:var(--green);font-size:.7rem;font-weight:700;margin-left:.4rem">&#10003; correcta</span>' : '') + '</label>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  return html;
+}
+
+function abrirPreview(titulo, descripcion, preguntas){
+  document.getElementById('previewTitulo').textContent = titulo || '(sin título)';
+  document.getElementById('previewDescripcion').textContent = descripcion || '';
+  document.getElementById('previewContent').innerHTML = renderPreviewPreguntas(preguntas);
+  document.getElementById('previewModal').style.display = 'block';
+}
+
+function cerrarPreview(){
+  document.getElementById('previewModal').style.display = 'none';
+}
+
+function previsualizarBuilder(){
+  syncBuilderFromDOM();
+  var titulo = document.getElementById('ev-titulo').value.trim();
+  var descripcion = document.getElementById('ev-descripcion').value.trim();
+  abrirPreview(titulo, descripcion, builderPreguntas);
+}
+
+async function previsualizarEvaluacionGuardada(id, titulo){
+  var pregRes = await sb.from('evaluacion_preguntas').select('*, evaluacion_opciones(*)').eq('evaluacion_id', id).order('orden');
+  var preguntas = (pregRes.data || []).map(function(p){
+    return {
+      tipo: p.tipo, enunciado: p.enunciado, peso: p.peso,
+      opciones: (p.evaluacion_opciones || []).slice().sort(function(a,b){ return a.orden - b.orden; })
+    };
+  });
+  var evalRes = await sb.from('evaluaciones').select('descripcion').eq('id', id).single();
+  abrirPreview(titulo, evalRes.data ? evalRes.data.descripcion : '', preguntas);
+}
+
+function baseEvaluacionUrl(){
+  if(location.protocol === 'http:' || location.protocol === 'https:'){
+    return location.origin + location.pathname.replace(/admin\.html$/, 'evaluacion.html');
+  }
+  if(location.protocol === 'file:'){
+    return location.href.replace(/admin\.html(\?.*)?$/, 'evaluacion.html');
+  }
+  return 'https://www.gecacreativo.com/evaluacion.html';
+}
+
+async function cargarAsignaciones(){
+  var asigRes = await sb.from('evaluacion_asignaciones').select('*, clientes(empresa)').eq('evaluacion_id', asignandoEvaluacionId);
+  var asignados = asigRes.data || [];
+  var idsAsignados = asignados.map(function(a){ return a.cliente_id; });
+
+  var contLista = document.getElementById('asignarClientesLista');
+  var html = '';
+  if(clientesCache.length === 0){
+    html = '<p class="empty">No hay clientes registrados todavía.</p>';
+  } else {
+    clientesCache.forEach(function(c){
+      var yaAsignado = idsAsignados.indexOf(c.id) !== -1;
+      html += '<label style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0">';
+      html += '<input type="checkbox" class="asignar-check" value="' + c.id + '" style="width:auto" ' + (yaAsignado?'checked disabled':'') + '/> ';
+      html += c.empresa + (yaAsignado ? ' <span style="color:var(--green);font-size:.75rem">(ya asignado)</span>' : '');
+      html += '</label>';
+    });
+    html += '<button class="btn-primary" style="margin-top:1rem" onclick="confirmarAsignacion()">Asignar seleccionados</button>';
+  }
+  contLista.innerHTML = html;
+
+  var contEnlaces = document.getElementById('enlacesGenerados');
+  if(asignados.length === 0){
+    contEnlaces.innerHTML = '<p class="empty">Aún no hay clientes asignados.</p>';
+  } else {
+    var base = baseEvaluacionUrl();
+    var html2 = '<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Enlace para compartir</th></tr></thead><tbody>';
+    asignados.forEach(function(a){
+      var link = base + '?token=' + a.token;
+      html2 += '<tr><td>' + (a.clientes ? a.clientes.empresa : '-') + '</td><td><input type="text" class="link-input" readonly value="' + link + '" onclick="this.select()"/></td></tr>';
+    });
+    html2 += '</tbody></table></div>';
+    contEnlaces.innerHTML = html2;
+  }
+}
+
+var resultadosEvalId = null;
+var detalleIntentoId = null;
+
+async function abrirResultados(evalId, titulo){
+  resultadosEvalId = evalId;
+  document.getElementById('resultadosEvalTitulo').textContent = titulo;
+  showEvalView('resultados');
+  await cargarResultados();
+}
+
+function cerrarResultados(){
+  showEvalView('lista');
+  cargarEvaluaciones();
+}
+
+async function cargarResultados(){
+  var cont = document.getElementById('tablaResultados');
+  cont.innerHTML = '<div class="spinner"></div>';
+
+  var r = await sb.from('evaluacion_intentos')
+    .select('*, evaluacion_asignaciones!inner(evaluacion_id, clientes(empresa))')
+    .eq('evaluacion_asignaciones.evaluacion_id', resultadosEvalId)
+    .order('enviado_en', {ascending:false});
+  var data = r.data || [];
+
+  var calificadas = data.filter(function(i){ return i.estado === 'calificada'; });
+  var promedio = calificadas.length
+    ? (calificadas.reduce(function(s,i){ return s + (i.puntaje_total||0); }, 0) / calificadas.length).toFixed(1)
+    : '-';
+  document.getElementById('resultadosStats').innerHTML =
+    '<div class="stat-card"><div class="stat-num">' + data.length + '</div><div class="stat-label">Personas que respondieron</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + (data.length - calificadas.length) + '</div><div class="stat-label">Pendientes de calificar</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + promedio + '</div><div class="stat-label">Promedio (calificadas)</div></div>';
+
+  if(data.length === 0){ cont.innerHTML = '<p class="empty">Todavía nadie ha respondido esta evaluación.</p>'; return; }
+
+  var html = '<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Nombre</th><th>Correo</th><th>Puntaje</th><th>Estado</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  data.forEach(function(i){
+    var empresa = (i.evaluacion_asignaciones && i.evaluacion_asignaciones.clientes) ? i.evaluacion_asignaciones.clientes.empresa : '-';
+    html += '<tr><td>' + empresa + '</td><td><strong>' + i.nombre + '</strong></td><td class="td-email">' + i.correo + '</td>';
+    html += '<td>' + (i.puntaje_total !== null ? i.puntaje_total : '<span style="color:var(--gray)">Pendiente</span>') + '</td>';
+    html += '<td><span class="estado-badge ' + (i.estado === 'calificada' ? 'estado-publicada' : 'estado-borrador') + '">' + (i.estado === 'calificada' ? 'Calificada' : 'Pendiente') + '</span></td>';
+    html += '<td><button class="btn-edit" onclick="abrirDetalleIntento(\'' + i.id + '\')">Ver / Calificar</button></td></tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
+}
+
+async function abrirDetalleIntento(intentoId){
+  detalleIntentoId = intentoId;
+
+  var intentoRes = await sb.from('evaluacion_intentos').select('*, evaluacion_asignaciones(clientes(empresa))').eq('id', intentoId).single();
+  var intento = intentoRes.data;
+  if(!intento) return;
+
+  var respRes = await sb.from('evaluacion_respuestas')
+    .select('*, evaluacion_preguntas(*), evaluacion_respuesta_opciones(opcion_id)')
+    .eq('intento_id', intentoId);
+  var respuestas = respRes.data || [];
+
+  var preguntaIds = respuestas.map(function(r){ return r.pregunta_id; });
+  var opcionesRes = preguntaIds.length ? await sb.from('evaluacion_opciones').select('*').in('pregunta_id', preguntaIds) : {data:[]};
+  var todasOpciones = opcionesRes.data || [];
+
+  var empresa = (intento.evaluacion_asignaciones && intento.evaluacion_asignaciones.clientes) ? intento.evaluacion_asignaciones.clientes.empresa : '-';
+  document.getElementById('gradeModalTitulo').textContent = intento.nombre + ' · ' + empresa;
+
+  var html = '<p style="color:var(--gray);font-size:.85rem;margin-bottom:1.5rem">' + intento.correo + '</p>';
+
+  respuestas
+    .slice()
+    .sort(function(a,b){ return (a.evaluacion_preguntas.orden||0) - (b.evaluacion_preguntas.orden||0); })
+    .forEach(function(r){
+      var p = r.evaluacion_preguntas;
+      html += '<div class="preview-card">';
+      html += '<div class="preview-num">' + p.peso + ' pts &middot; ' + TIPO_LABELS[p.tipo] + '</div>';
+      html += '<div class="preview-enunciado">' + p.enunciado + '</div>';
+      if(p.tipo === 'abierta'){
+        html += '<div class="preview-input" style="background:var(--white);margin-bottom:.8rem;min-height:2.4rem">' + (r.respuesta_texto ? r.respuesta_texto : '<em>(sin respuesta)</em>') + '</div>';
+        html += '<label style="display:block;font-family:\'Montserrat\',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:.4rem">Puntaje (m&#225;x. ' + p.peso + ')</label>';
+        html += '<input type="number" class="grade-input" data-respuesta="' + r.id + '" min="0" max="' + p.peso + '" step="0.5" value="' + (r.puntaje_obtenido !== null ? r.puntaje_obtenido : '') + '" style="width:120px;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .7rem;margin-bottom:.8rem"/>';
+        html += '<label style="display:block;font-family:\'Montserrat\',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:.4rem">Retroalimentaci&#243;n para esta persona (opcional)</label>';
+        html += '<textarea class="grade-retro" data-respuesta="' + r.id + '" rows="2" placeholder="Comparte una observación sobre esta respuesta..." style="width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.6rem .8rem;font-family:\'Open Sans\',sans-serif;font-size:.85rem">' + (r.retroalimentacion || '') + '</textarea>';
+      } else {
+        var seleccionadas = (r.evaluacion_respuesta_opciones || []).map(function(x){ return x.opcion_id; });
+        var opcionesPregunta = todasOpciones.filter(function(o){ return o.pregunta_id === p.id; });
+        var esCorrecta = r.puntaje_obtenido !== null && r.puntaje_obtenido >= p.peso;
+        html += '<div class="preview-opciones">';
+        opcionesPregunta.forEach(function(o){
+          var marcada = seleccionadas.indexOf(o.id) !== -1;
+          var color = o.es_correcta ? 'var(--green)' : (marcada ? '#c02535' : 'inherit');
+          html += '<label class="preview-opcion">';
+          html += (marcada ? '&#9679;' : '&#9675;') + ' <span style="color:' + color + '">' + o.texto + '</span>';
+          if(o.es_correcta) html += ' <span style="color:var(--green);font-size:.7rem;font-weight:700">&#10003; correcta</span>';
+          html += '</label>';
+        });
+        html += '</div>';
+        html += '<p style="margin-top:.6rem;font-size:.8rem;color:var(--gray)">Puntaje obtenido: <strong>' + (r.puntaje_obtenido || 0) + ' / ' + p.peso + '</strong></p>';
+        if(esCorrecta && p.retroalimentacion){
+          html += '<p style="margin-top:.6rem;background:rgba(31,87,32,.08);border:1px solid rgba(31,87,32,.2);border-radius:8px;padding:.6rem .8rem;font-size:.82rem;color:var(--green)">&#128172; ' + p.retroalimentacion + '</p>';
+        }
+      }
+      html += '</div>';
+    });
+
+  html += '<button class="btn-primary" onclick="guardarCalificacion()">Guardar calificaci&#243;n</button>';
+  document.getElementById('gradeModalContent').innerHTML = html;
+  document.getElementById('gradeModal').style.display = 'block';
+}
+
+function cerrarDetalleIntento(){
+  document.getElementById('gradeModal').style.display = 'none';
+  detalleIntentoId = null;
+}
+
+async function guardarCalificacion(){
+  var inputs = document.querySelectorAll('.grade-input');
+  var manualSum = 0;
+
+  for(var idx=0; idx<inputs.length; idx++){
+    var el = inputs[idx];
+    var val = parseFloat(el.value);
+    if(isNaN(val)) val = 0;
+    var maxVal = parseFloat(el.max);
+    if(val > maxVal) val = maxVal;
+    if(val < 0) val = 0;
+    var retroEl = document.querySelector('.grade-retro[data-respuesta="' + el.dataset.respuesta + '"]');
+    var retro = retroEl ? retroEl.value.trim() : '';
+    await sb.from('evaluacion_respuestas').update({puntaje_obtenido: val, retroalimentacion: retro || null, calificada_en: new Date().toISOString()}).eq('id', el.dataset.respuesta);
+    manualSum += val;
+  }
+
+  var intentoRes = await sb.from('evaluacion_intentos').select('puntaje_auto').eq('id', detalleIntentoId).single();
+  var puntajeAuto = (intentoRes.data && intentoRes.data.puntaje_auto) || 0;
+  var total = puntajeAuto + manualSum;
+
+  var updR = await sb.from('evaluacion_intentos').update({puntaje_manual: manualSum, puntaje_total: total, estado:'calificada'}).eq('id', detalleIntentoId);
+  if(updR.error){ toast('Error al guardar calificación: ' + updR.error.message, 'error'); return; }
+
+  toast('Calificación guardada.');
+  cerrarDetalleIntento();
+  cargarResultados();
+}
+
+async function confirmarAsignacion(){
+  var checks = document.querySelectorAll('.asignar-check:not(:disabled):checked');
+  if(checks.length === 0){ toast('Selecciona al menos un cliente nuevo.','error'); return; }
+  var payload = Array.prototype.map.call(checks, function(chk){ return {evaluacion_id:asignandoEvaluacionId, cliente_id:chk.value}; });
+  var r = await sb.from('evaluacion_asignaciones').insert(payload);
+  if(r.error){ toast('Error al asignar: ' + r.error.message,'error'); return; }
+  toast('Clientes asignados. Enlaces generados.');
+  cargarAsignaciones();
 }
 
 function editarCliente(id){
@@ -765,6 +1461,7 @@ function showPage(id){
   if(navItem) navItem.classList.add('active');
   if(id==='informes') cargarInformesTabla();
   if(id==='biblioteca') cargarBibliotecaTabla();
+  if(id==='evaluaciones'){ showEvalView('lista'); cargarEvaluaciones(); }
 }
 
 function toast(msg, tipo){

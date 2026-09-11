@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Evaluación — GECA Creativo</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" href="favicon.png" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--pink:#FF888F;--orange:#FF8805;--yellow:#FFEF8F;--blue:#003C7E;--green:#1F5720;--ink:#0f0e0d;--cream:#faf8f4;--white:#ffffff;--gray:#5a5550;--border:rgba(0,60,126,.11);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
+.accent-bar{height:4px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))}
+header{background:var(--ink);padding:1.2rem 2rem;display:flex;align-items:center;gap:.75rem}
+header img{height:36px;width:auto}
+header span{font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.04em}
+main{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 1rem;gap:1rem;color:var(--gray)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.error-box{background:var(--white);border:1px solid rgba(255,136,143,.35);border-radius:16px;padding:2.5rem;text-align:center;margin-top:2rem}
+.error-box .icon{font-size:2.4rem;margin-bottom:1rem}
+.error-box p{color:var(--gray);font-size:.95rem;line-height:1.6}
+
+.eval-header{margin-bottom:2rem}
+.eval-tag{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pink);margin-bottom:.6rem}
+.eval-titulo{font-family:'Montserrat',sans-serif;font-size:clamp(1.4rem,3vw,1.9rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:.5rem}
+.eval-desc{color:var(--gray);font-size:.9rem;line-height:1.6}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.8rem;margin-bottom:1.2rem}
+.fg{margin-bottom:1.1rem}
+.fg label{display:block;font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:.45rem}
+.fg input,.fg textarea{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;font-family:'Open Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+.fg input:focus,.fg textarea:focus{border-color:var(--pink)}
+
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--pink),var(--orange));color:var(--white);border:none;border-radius:100px;padding:1rem;font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:transform .2s,opacity .2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.form-err{background:rgba(255,136,143,.12);border:1px solid rgba(255,136,143,.3);color:#c02535;border-radius:10px;padding:.75rem 1rem;font-size:.85rem;text-align:center;margin-bottom:1rem;display:none}
+.form-err.show{display:block}
+
+.preg-num{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.preg-enunciado{font-weight:700;font-size:.98rem;margin-bottom:1rem;line-height:1.5}
+.opciones-publicas{display:flex;flex-direction:column;gap:.6rem}
+.resp-abierta{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;font-family:'Open Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s;resize:vertical}
+.resp-abierta:focus{border-color:var(--pink)}
+.opcion-publica{display:flex;align-items:center;gap:.7rem;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;font-size:.9rem;cursor:pointer;transition:border-color .2s}
+.opcion-publica:has(input:checked){border-color:var(--pink);background:rgba(255,136,143,.06)}
+.opcion-publica input{width:auto;flex-shrink:0}
+
+.success-box{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:3rem 2rem;text-align:center}
+.success-box .icon{font-size:3rem;margin-bottom:1rem}
+.success-box h2{font-family:'Montserrat',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.6rem}
+.success-box p{color:var(--gray);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div class="accent-bar"></div>
+<header>
+  <img src="Logo%20GECA.png" alt="GECA Creativo"/>
+  <span>Centro de Evaluación</span>
+</header>
+
+<main>
+  <div id="loadingState" class="loading">
+    <div class="spinner"></div>
+    <span style="font-family:'Montserrat',sans-serif;font-size:.85rem;letter-spacing:.06em">Cargando evaluación...</span>
+  </div>
+
+  <div id="errorState" style="display:none">
+    <div class="error-box">
+      <div class="icon">&#128683;</div>
+      <p id="errorMsg"></p>
+    </div>
+  </div>
+
+  <div id="contentState" style="display:none">
+    <div class="eval-header">
+      <div class="eval-tag" id="empresaEval"></div>
+      <h1 class="eval-titulo" id="tituloEval"></h1>
+      <p class="eval-desc" id="descEval"></p>
+    </div>
+
+    <div id="identStep" style="display:none">
+      <div class="card">
+        <div class="fg">
+          <label>Nombre completo</label>
+          <input type="text" id="id-nombre" placeholder="Tu nombre"/>
+        </div>
+        <div class="fg">
+          <label>Correo electrónico</label>
+          <input type="email" id="id-correo" placeholder="tu@correo.com"/>
+        </div>
+        <div class="form-err" id="identErr"></div>
+        <button class="btn-primary" onclick="comenzar()">Comenzar evaluación &#8594;</button>
+      </div>
+    </div>
+
+    <div id="formStep" style="display:none">
+      <div id="preguntasEval"></div>
+      <div class="card">
+        <div class="form-err" id="formErr"></div>
+        <button class="btn-primary" id="btnEnviar" onclick="enviarRespuestas()">Enviar evaluación</button>
+      </div>
+    </div>
+
+    <div id="successStep" style="display:none">
+      <div class="success-box">
+        <div class="icon">&#9989;</div>
+        <h2 id="successTitulo">¡Gracias!</h2>
+        <p id="successMensaje">Tu evaluación fue enviada correctamente.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+var SUPABASE_URL = 'https://aynfjhepnsidssrxblat.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5bmZqaGVwbnNpZHNzcnhibGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4ODMzODQsImV4cCI6MjA5NzQ1OTM4NH0.-N-cl71RSf4SjxlxiBk9k2m90kTUCVjxfl5rfacwd98';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+var asignacionActual = null;
+var preguntasActuales = [];
+var respondienteNombre = '';
+var respondienteCorreo = '';
+
+async function cargarEvaluacion(){
+  var params = new URLSearchParams(location.search);
+  var token = params.get('token');
+  if(!token){ showError('Este enlace está incompleto.'); return; }
+
+  var asigRes = await sb.from('evaluacion_publica_asignaciones').select('*').eq('token', token).single();
+  if(asigRes.error || !asigRes.data){ showError('Este enlace no es válido o la evaluación ya no está disponible.'); return; }
+  asignacionActual = asigRes.data;
+
+  var pregRes = await sb.from('evaluacion_publica_preguntas').select('*').eq('evaluacion_id', asignacionActual.evaluacion_id).order('orden');
+  preguntasActuales = pregRes.data || [];
+
+  if(preguntasActuales.length === 0){ showError('Esta evaluación todavía no tiene preguntas cargadas.'); return; }
+
+  var ids = preguntasActuales.map(function(p){ return p.id; });
+  var opRes = await sb.from('evaluacion_publica_opciones').select('*').in('pregunta_id', ids).order('orden');
+  var opciones = opRes.data || [];
+  preguntasActuales.forEach(function(p){
+    p.opciones = opciones.filter(function(o){ return o.pregunta_id === p.id; });
+  });
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('empresaEval').textContent = asignacionActual.empresa;
+  document.getElementById('tituloEval').textContent = asignacionActual.titulo;
+  document.getElementById('descEval').textContent = asignacionActual.descripcion || '';
+  document.getElementById('contentState').style.display = 'block';
+  document.getElementById('identStep').style.display = 'block';
+}
+
+function showError(msg){
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorState').style.display = 'block';
+}
+
+function showIdentErr(msg){
+  var e = document.getElementById('identErr');
+  e.textContent = msg; e.classList.add('show');
+}
+
+function showFormErr(msg){
+  var e = document.getElementById('formErr');
+  e.textContent = msg; e.classList.add('show');
+}
+
+function comenzar(){
+  var nombre = document.getElementById('id-nombre').value.trim();
+  var correo = document.getElementById('id-correo').value.trim();
+  document.getElementById('identErr').classList.remove('show');
+  if(!nombre || !correo){ showIdentErr('Completa tu nombre y correo.'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){ showIdentErr('Ingresa un correo válido.'); return; }
+  respondienteNombre = nombre;
+  respondienteCorreo = correo;
+  document.getElementById('identStep').style.display = 'none';
+  renderPreguntas();
+  document.getElementById('formStep').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderPreguntas(){
+  var cont = document.getElementById('preguntasEval');
+  var html = '';
+  preguntasActuales.forEach(function(p, i){
+    html += '<div class="card">';
+    html += '<div class="preg-num">Pregunta ' + (i+1) + ' de ' + preguntasActuales.length + '</div>';
+    html += '<div class="preg-enunciado">' + p.enunciado + '</div>';
+    if(p.tipo === 'abierta'){
+      html += '<textarea class="resp-abierta" data-pregunta="' + p.id + '" rows="3" placeholder="Escribe tu respuesta..."></textarea>';
+    } else {
+      html += '<div class="opciones-publicas">';
+      p.opciones.forEach(function(o){
+        html += '<label class="opcion-publica"><input type="' + (p.tipo==='opcion_unica' ? 'radio' : 'checkbox') + '" name="preg-' + p.id + '" value="' + o.id + '"/> ' + o.texto + '</label>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+}
+
+async function enviarRespuestas(){
+  document.getElementById('formErr').classList.remove('show');
+  var respuestas = [];
+  var incompleta = false;
+
+  preguntasActuales.forEach(function(p){
+    if(p.tipo === 'abierta'){
+      var val = document.querySelector('.resp-abierta[data-pregunta="' + p.id + '"]').value.trim();
+      if(!val) incompleta = true;
+      respuestas.push({pregunta_id:p.id, respuesta_texto:val});
+    } else {
+      var checks = document.querySelectorAll('input[name="preg-' + p.id + '"]:checked');
+      if(checks.length === 0) incompleta = true;
+      respuestas.push({pregunta_id:p.id, opcion_ids: Array.prototype.map.call(checks, function(c){ return c.value; })});
+    }
+  });
+
+  if(incompleta){ showFormErr('Responde todas las preguntas antes de enviar.'); return; }
+
+  var btn = document.getElementById('btnEnviar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  var r = await sb.rpc('enviar_evaluacion', {
+    p_token: asignacionActual.token,
+    p_nombre: respondienteNombre,
+    p_correo: respondienteCorreo,
+    p_respuestas: respuestas
+  });
+
+  if(r.error){
+    btn.disabled = false; btn.textContent = 'Enviar evaluación';
+    if(r.error.code === '23505'){
+      showFormErr('Ya registramos una evaluación enviada con este correo para esta empresa.');
+    } else {
+      showFormErr('No se pudo enviar: ' + r.error.message);
+    }
+    return;
+  }
+
+  if(asignacionActual.usar_mensaje_personalizado && asignacionActual.mensaje_personalizado){
+    document.getElementById('successTitulo').textContent = '¡Listo!';
+    document.getElementById('successMensaje').textContent = asignacionActual.mensaje_personalizado;
+  }
+
+  document.getElementById('formStep').style.display = 'none';
+  document.getElementById('successStep').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+cargarEvaluacion();
+</script>
+</body>
+</html>
