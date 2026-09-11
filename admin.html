@@ -373,20 +373,26 @@ tr:hover td{background:rgba(0,60,126,.02)}
     <!-- BIBLIOTECA DE RECURSOS -->
     <div class="page" id="page-biblioteca">
       <h1 class="page-title">Biblioteca de Recursos</h1>
-      <p class="page-sub">Contenidos y material de formaci&#243;n visibles para todos los clientes en su portal.</p>
+      <p class="page-sub">Contenidos y material de formaci&#243;n, espec&#237;ficos para cada cliente en su portal.</p>
 
       <div class="card">
         <div class="card-title">Agregar recurso</div>
         <p class="edit-banner" id="editRecursoMsg"></p>
         <div class="form-row">
           <div class="fg">
+            <label>Cliente</label>
+            <select id="b-cliente">
+              <option value="">Selecciona un cliente...</option>
+            </select>
+          </div>
+          <div class="fg">
             <label>T&#237;tulo</label>
             <input type="text" id="b-titulo" placeholder="Ej: Taller de Liderazgo Situacional"/>
           </div>
-          <div class="fg">
-            <label>Enlace del contenido</label>
-            <input type="url" id="b-enlace" placeholder="https://drive.google.com/... o cualquier enlace"/>
-          </div>
+        </div>
+        <div class="fg">
+          <label>Enlace del contenido</label>
+          <input type="url" id="b-enlace" placeholder="https://drive.google.com/... o cualquier enlace"/>
         </div>
         <div class="form-row">
           <div class="fg">
@@ -415,6 +421,12 @@ tr:hover td{background:rgba(0,60,126,.02)}
 
       <div class="card">
         <div class="card-title">Recursos cargados</div>
+        <div class="fg">
+          <label>Filtrar por cliente</label>
+          <select id="filtroClienteBiblioteca" onchange="cargarBibliotecaTabla()">
+            <option value="">Todos los clientes</option>
+          </select>
+        </div>
         <div id="tablaBiblioteca"><div class="spinner"></div></div>
       </div>
     </div>
@@ -510,7 +522,7 @@ async function cargarClientesCache(){
 }
 
 function llenarSelectClientes(){
-  var selects = [document.getElementById('i-cliente'), document.getElementById('filtroCliente')];
+  var selects = [document.getElementById('i-cliente'), document.getElementById('filtroCliente'), document.getElementById('b-cliente'), document.getElementById('filtroClienteBiblioteca')];
   clientesCache.forEach(function(c){
     selects.forEach(function(sel){
       if(!sel) return;
@@ -555,14 +567,17 @@ async function cargarBibliotecaTabla(){
   var cont = document.getElementById('tablaBiblioteca');
   if(!cont) return;
   cont.innerHTML = '<div class="spinner"></div>';
-  var r = await sb.from('biblioteca').select('*').order('anio',{ascending:false}).order('mes',{ascending:false});
+  var filtro = document.getElementById('filtroClienteBiblioteca');
+  var query = sb.from('biblioteca').select('*, clientes(empresa)').order('anio',{ascending:false}).order('mes',{ascending:false});
+  if(filtro && filtro.value) query = query.eq('cliente_id', filtro.value);
+  var r = await query;
   var data = r.data || [];
   bibliotecaCache = data;
   var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   if(data.length===0){ cont.innerHTML='<p class="empty">No hay recursos cargados.</p>'; return; }
-  var html='<div class="table-wrap"><table><thead><tr><th>T&#237;tulo</th><th>Periodo</th><th>Temas</th><th>Enlace</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  var html='<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>T&#237;tulo</th><th>Periodo</th><th>Temas</th><th>Enlace</th><th>Acci&#243;n</th></tr></thead><tbody>';
   data.forEach(function(b){
-    html+='<tr><td><strong>' + b.titulo + '</strong></td><td><span class="mes-badge">' + MESES[b.mes-1] + ' ' + b.anio + '</span></td><td class="td-email">' + (b.temas||'-') + '</td><td class="td-link"><a href="' + b.enlace + '" target="_blank">Ver &#8594;</a></td><td><button class="btn-edit" onclick="editarRecurso(\'' + b.id + '\')">Editar</button><button class="btn-danger" onclick="eliminarRecurso(\'' + b.id + '\')">Eliminar</button></td></tr>';
+    html+='<tr><td>' + (b.clientes?b.clientes.empresa:'<span style="color:#c02535">Sin cliente</span>') + '</td><td><strong>' + b.titulo + '</strong></td><td><span class="mes-badge">' + MESES[b.mes-1] + ' ' + b.anio + '</span></td><td class="td-email">' + (b.temas||'-') + '</td><td class="td-link"><a href="' + b.enlace + '" target="_blank">Ver &#8594;</a></td><td><button class="btn-edit" onclick="editarRecurso(\'' + b.id + '\')">Editar</button><button class="btn-danger" onclick="eliminarRecurso(\'' + b.id + '\')">Eliminar</button></td></tr>';
   });
   html+='</tbody></table></div>';
   cont.innerHTML=html;
@@ -667,6 +682,7 @@ function editarRecurso(id){
   var b = bibliotecaCache.find(function(x){ return x.id === id; });
   if(!b) return;
   editingRecursoId = id;
+  document.getElementById('b-cliente').value = b.cliente_id || '';
   document.getElementById('b-titulo').value = b.titulo || '';
   document.getElementById('b-enlace').value = b.enlace || '';
   document.getElementById('b-mes').value = b.mes;
@@ -683,6 +699,7 @@ function editarRecurso(id){
 
 function cancelarEdicionRecurso(){
   editingRecursoId = null;
+  document.getElementById('b-cliente').value='';
   document.getElementById('b-titulo').value='';
   document.getElementById('b-enlace').value='';
   document.getElementById('b-temas').value='';
@@ -692,13 +709,14 @@ function cancelarEdicionRecurso(){
 }
 
 async function guardarRecurso(){
+  var clienteId = document.getElementById('b-cliente').value;
   var titulo = document.getElementById('b-titulo').value.trim();
   var enlace = document.getElementById('b-enlace').value.trim();
   var mes    = parseInt(document.getElementById('b-mes').value);
   var anio   = parseInt(document.getElementById('b-anio').value);
   var temas  = document.getElementById('b-temas').value.trim();
-  if(!titulo||!enlace){ toast('Completa al menos título y enlace.','error'); return; }
-  var payload = {titulo:titulo, enlace:enlace, mes:mes, anio:anio, temas:temas};
+  if(!clienteId||!titulo||!enlace){ toast('Completa cliente, título y enlace.','error'); return; }
+  var payload = {cliente_id:clienteId, titulo:titulo, enlace:enlace, mes:mes, anio:anio, temas:temas};
   var r = editingRecursoId
     ? await sb.from('biblioteca').update(payload).eq('id', editingRecursoId)
     : await sb.from('biblioteca').insert(payload);

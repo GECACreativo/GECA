@@ -166,9 +166,10 @@ async function init(){
 
   todosInformes = informesRes.data || [];
 
-  // Obtener biblioteca de recursos (compartida entre todos los clientes)
+  // Obtener biblioteca de recursos del cliente
   var bibliotecaRes = await sb.from('biblioteca')
     .select('*')
+    .eq('cliente_id', clienteRes.data ? clienteRes.data.id : user.id)
     .order('anio', {ascending:false})
     .order('mes', {ascending:false});
 
