@@ -229,6 +229,7 @@ tr:hover td{background:rgba(0,60,126,.02)}
     <div class="nav-item" data-page="clientes" onclick="showPage('clientes')"><span class="nav-icon">&#128101;</span> Clientes</div>
     <div class="nav-item" data-page="informes" onclick="showPage('informes')"><span class="nav-icon">&#128196;</span> Informes</div>
     <div class="nav-item" data-page="nuevo-informe" onclick="showPage('nuevo-informe')"><span class="nav-icon">&#43;</span> Agregar Informe</div>
+    <div class="nav-item" data-page="biblioteca" onclick="showPage('biblioteca')"><span class="nav-icon">&#128218;</span> Biblioteca de Recursos</div>
   </nav>
 
   <!-- CONTENT -->
@@ -369,6 +370,55 @@ tr:hover td{background:rgba(0,60,126,.02)}
       </div>
     </div>
 
+    <!-- BIBLIOTECA DE RECURSOS -->
+    <div class="page" id="page-biblioteca">
+      <h1 class="page-title">Biblioteca de Recursos</h1>
+      <p class="page-sub">Contenidos y material de formaci&#243;n visibles para todos los clientes en su portal.</p>
+
+      <div class="card">
+        <div class="card-title">Agregar recurso</div>
+        <p class="edit-banner" id="editRecursoMsg"></p>
+        <div class="form-row">
+          <div class="fg">
+            <label>T&#237;tulo</label>
+            <input type="text" id="b-titulo" placeholder="Ej: Taller de Liderazgo Situacional"/>
+          </div>
+          <div class="fg">
+            <label>Enlace del contenido</label>
+            <input type="url" id="b-enlace" placeholder="https://drive.google.com/... o cualquier enlace"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Mes</label>
+            <select id="b-mes">
+              <option value="1">Enero</option><option value="2">Febrero</option>
+              <option value="3">Marzo</option><option value="4">Abril</option>
+              <option value="5">Mayo</option><option value="6">Junio</option>
+              <option value="7">Julio</option><option value="8">Agosto</option>
+              <option value="9">Septiembre</option><option value="10">Octubre</option>
+              <option value="11">Noviembre</option><option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>A&#241;o</label>
+            <input type="number" id="b-anio" value="2025" min="2020" max="2030"/>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Temas tratados</label>
+          <textarea id="b-temas" rows="2" placeholder="Ej: Comunicaci&#243;n asertiva, manejo de conflictos, feedback efectivo..."></textarea>
+        </div>
+        <button class="btn-primary" id="btnRecurso" onclick="guardarRecurso()">Agregar a la biblioteca</button>
+        <button class="btn-secondary" id="btnCancelarRecurso" style="display:none" onclick="cancelarEdicionRecurso()">Cancelar edici&#243;n</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recursos cargados</div>
+        <div id="tablaBiblioteca"><div class="spinner"></div></div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /layout -->
 
@@ -380,8 +430,10 @@ var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 var clientesCache = [];
 var informesCache = [];
+var bibliotecaCache = [];
 var editingClienteId = null;
 var editingInformeId = null;
+var editingRecursoId = null;
 
 async function adminLogin(){
   var email = document.getElementById('al-email').value.trim();
@@ -411,6 +463,7 @@ async function adminLogin(){
   await cargarClientesCache();
   cargarTablaClientes();
   cargarInformesTabla();
+  cargarBibliotecaTabla();
   llenarSelectClientes();
 }
 
@@ -436,6 +489,7 @@ async function init(){
   await cargarClientesCache();
   cargarTablaClientes();
   cargarInformesTabla();
+  cargarBibliotecaTabla();
   llenarSelectClientes();
 }
 
@@ -492,6 +546,23 @@ async function cargarInformesTabla(){
   var html='<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>T&#237;tulo</th><th>Periodo</th><th>Enlace</th><th>Acci&#243;n</th></tr></thead><tbody>';
   data.forEach(function(i){
     html+='<tr><td>' + (i.clientes?i.clientes.empresa:'-') + '</td><td><strong>' + i.titulo + '</strong></td><td><span class="mes-badge">' + MESES[i.mes-1] + ' ' + i.anio + '</span></td><td class="td-link"><a href="' + i.enlace + '" target="_blank">Ver &#8594;</a></td><td><button class="btn-edit" onclick="editarInforme(\'' + i.id + '\')">Editar</button><button class="btn-danger" onclick="eliminarInforme(\'' + i.id + '\')">Eliminar</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  cont.innerHTML=html;
+}
+
+async function cargarBibliotecaTabla(){
+  var cont = document.getElementById('tablaBiblioteca');
+  if(!cont) return;
+  cont.innerHTML = '<div class="spinner"></div>';
+  var r = await sb.from('biblioteca').select('*').order('anio',{ascending:false}).order('mes',{ascending:false});
+  var data = r.data || [];
+  bibliotecaCache = data;
+  var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  if(data.length===0){ cont.innerHTML='<p class="empty">No hay recursos cargados.</p>'; return; }
+  var html='<div class="table-wrap"><table><thead><tr><th>T&#237;tulo</th><th>Periodo</th><th>Temas</th><th>Enlace</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  data.forEach(function(b){
+    html+='<tr><td><strong>' + b.titulo + '</strong></td><td><span class="mes-badge">' + MESES[b.mes-1] + ' ' + b.anio + '</span></td><td class="td-email">' + (b.temas||'-') + '</td><td class="td-link"><a href="' + b.enlace + '" target="_blank">Ver &#8594;</a></td><td><button class="btn-edit" onclick="editarRecurso(\'' + b.id + '\')">Editar</button><button class="btn-danger" onclick="eliminarRecurso(\'' + b.id + '\')">Eliminar</button></td></tr>';
   });
   html+='</tbody></table></div>';
   cont.innerHTML=html;
@@ -592,6 +663,58 @@ async function agregarInforme(){
   cargarInformesTabla();
 }
 
+function editarRecurso(id){
+  var b = bibliotecaCache.find(function(x){ return x.id === id; });
+  if(!b) return;
+  editingRecursoId = id;
+  document.getElementById('b-titulo').value = b.titulo || '';
+  document.getElementById('b-enlace').value = b.enlace || '';
+  document.getElementById('b-mes').value = b.mes;
+  document.getElementById('b-anio').value = b.anio;
+  document.getElementById('b-temas').value = b.temas || '';
+  document.getElementById('btnRecurso').textContent = 'Actualizar recurso';
+  document.getElementById('btnCancelarRecurso').style.display = 'inline-block';
+  var msg = document.getElementById('editRecursoMsg');
+  msg.textContent = '✏️ Editando: ' + b.titulo;
+  msg.style.display = 'block';
+  showPage('biblioteca');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicionRecurso(){
+  editingRecursoId = null;
+  document.getElementById('b-titulo').value='';
+  document.getElementById('b-enlace').value='';
+  document.getElementById('b-temas').value='';
+  document.getElementById('btnRecurso').textContent = 'Agregar a la biblioteca';
+  document.getElementById('btnCancelarRecurso').style.display = 'none';
+  document.getElementById('editRecursoMsg').style.display = 'none';
+}
+
+async function guardarRecurso(){
+  var titulo = document.getElementById('b-titulo').value.trim();
+  var enlace = document.getElementById('b-enlace').value.trim();
+  var mes    = parseInt(document.getElementById('b-mes').value);
+  var anio   = parseInt(document.getElementById('b-anio').value);
+  var temas  = document.getElementById('b-temas').value.trim();
+  if(!titulo||!enlace){ toast('Completa al menos título y enlace.','error'); return; }
+  var payload = {titulo:titulo, enlace:enlace, mes:mes, anio:anio, temas:temas};
+  var r = editingRecursoId
+    ? await sb.from('biblioteca').update(payload).eq('id', editingRecursoId)
+    : await sb.from('biblioteca').insert(payload);
+  if(r.error){ toast('Error al guardar recurso: ' + r.error.message,'error'); return; }
+  toast('Recurso ' + (editingRecursoId ? 'actualizado' : 'agregado') + ' correctamente.');
+  cancelarEdicionRecurso();
+  cargarBibliotecaTabla();
+}
+
+async function eliminarRecurso(id){
+  if(!confirm('¿Eliminar este recurso de la biblioteca?')) return;
+  await sb.from('biblioteca').delete().eq('id',id);
+  toast('Recurso eliminado.');
+  cargarBibliotecaTabla();
+}
+
 async function eliminarCliente(id){
   if(!confirm('\u00bfEliminar este cliente y todos sus informes?')) return;
   await sb.from('informes').delete().eq('cliente_id',id);
@@ -623,6 +746,7 @@ function showPage(id){
   var navItem = document.querySelector('.nav-item[data-page="'+id+'"]');
   if(navItem) navItem.classList.add('active');
   if(id==='informes') cargarInformesTabla();
+  if(id==='biblioteca') cargarBibliotecaTabla();
 }
 
 function toast(msg, tipo){

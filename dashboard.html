@@ -35,6 +35,12 @@ main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
 .welcome-sub{font-size:.95rem;color:var(--gray);line-height:1.7}
 .empresa-name{color:var(--blue);font-weight:700}
 
+/* Tabs */
+.tab-row{display:flex;gap:.6rem;margin-bottom:2rem;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:700;padding:.7rem 1.2rem;border:none;background:none;color:var(--gray);cursor:pointer;letter-spacing:.02em;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-btn:hover:not(.active){color:var(--ink)}
+
 /* Filtros por año */
 .filter-row{display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;flex-wrap:wrap}
 .filter-label{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray)}
@@ -102,15 +108,28 @@ main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem}
   <div id="mainContent" style="display:none">
     <div class="welcome-section">
       <div class="welcome-tag">Bienvenido</div>
-      <h1 class="welcome-title">Tus informes, <span class="empresa-name" id="empresaName"></span></h1>
-      <p class="welcome-sub">Aqu&#237; encuentras todos los informes que GECA Creativo ha generado para ti, organizados por mes. Haz clic en cualquier informe para visualizarlo.</p>
+      <h1 class="welcome-title">Hola, <span class="empresa-name" id="empresaName"></span></h1>
+      <p class="welcome-sub">Aqu&#237; encuentras los informes que GECA Creativo ha generado para ti y la biblioteca de recursos de formaci&#243;n, organizados por mes.</p>
     </div>
 
-    <div class="filter-row" id="yearFilters">
-      <span class="filter-label">A&#241;o:</span>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabInformesBtn" onclick="cambiarTab('informes')">&#128202; Mis Informes</button>
+      <button class="tab-btn" id="tabBibliotecaBtn" onclick="cambiarTab('biblioteca')">&#128218; Biblioteca de Recursos</button>
     </div>
 
-    <div id="informesContainer"></div>
+    <div id="vistaInformes">
+      <div class="filter-row" id="yearFilters">
+        <span class="filter-label">A&#241;o:</span>
+      </div>
+      <div id="informesContainer"></div>
+    </div>
+
+    <div id="vistaBiblioteca" style="display:none">
+      <div class="filter-row" id="yearFiltersBiblioteca">
+        <span class="filter-label">A&#241;o:</span>
+      </div>
+      <div id="bibliotecaContainer"></div>
+    </div>
   </div>
 </main>
 
@@ -121,7 +140,9 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 var todosInformes = [];
-var anioActivo = null;
+var todaBiblioteca = [];
+var anioActivoInformes = null;
+var anioActivoBiblioteca = null;
 
 async function init(){
   var session = await sb.auth.getSession();
@@ -145,33 +166,72 @@ async function init(){
 
   todosInformes = informesRes.data || [];
 
+  // Obtener biblioteca de recursos (compartida entre todos los clientes)
+  var bibliotecaRes = await sb.from('biblioteca')
+    .select('*')
+    .order('anio', {ascending:false})
+    .order('mes', {ascending:false});
+
+  todaBiblioteca = bibliotecaRes.data || [];
+
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('mainContent').style.display = 'block';
 
-  renderAnios();
+  renderAniosInformes();
+  renderAniosBiblioteca();
 }
 
-function renderAnios(){
+function cambiarTab(tab){
+  document.getElementById('tabInformesBtn').classList.toggle('active', tab==='informes');
+  document.getElementById('tabBibliotecaBtn').classList.toggle('active', tab==='biblioteca');
+  document.getElementById('vistaInformes').style.display = tab==='informes' ? 'block' : 'none';
+  document.getElementById('vistaBiblioteca').style.display = tab==='biblioteca' ? 'block' : 'none';
+}
+
+function renderAniosInformes(){
   var anios = [...new Set(todosInformes.map(function(i){ return i.anio; }))].sort(function(a,b){return b-a});
   var container = document.getElementById('yearFilters');
 
   if(anios.length === 0){ renderInformes([]); return; }
 
-  anioActivo = anios[0];
+  anioActivoInformes = anios[0];
   anios.forEach(function(anio){
     var btn = document.createElement('button');
-    btn.className = 'filter-btn' + (anio === anioActivo ? ' active' : '');
+    btn.className = 'filter-btn' + (anio === anioActivoInformes ? ' active' : '');
     btn.textContent = anio;
     btn.onclick = function(){
-      document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      container.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
-      anioActivo = anio;
+      anioActivoInformes = anio;
       renderInformes(todosInformes.filter(function(i){ return i.anio === anio; }));
     };
     container.appendChild(btn);
   });
 
-  renderInformes(todosInformes.filter(function(i){ return i.anio === anioActivo; }));
+  renderInformes(todosInformes.filter(function(i){ return i.anio === anioActivoInformes; }));
+}
+
+function renderAniosBiblioteca(){
+  var anios = [...new Set(todaBiblioteca.map(function(b){ return b.anio; }))].sort(function(a,b){return b-a});
+  var container = document.getElementById('yearFiltersBiblioteca');
+
+  if(anios.length === 0){ renderBiblioteca([]); return; }
+
+  anioActivoBiblioteca = anios[0];
+  anios.forEach(function(anio){
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn' + (anio === anioActivoBiblioteca ? ' active' : '');
+    btn.textContent = anio;
+    btn.onclick = function(){
+      container.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      anioActivoBiblioteca = anio;
+      renderBiblioteca(todaBiblioteca.filter(function(b){ return b.anio === anio; }));
+    };
+    container.appendChild(btn);
+  });
+
+  renderBiblioteca(todaBiblioteca.filter(function(b){ return b.anio === anioActivoBiblioteca; }));
 }
 
 function renderInformes(informes){
@@ -224,6 +284,64 @@ function renderInformes(informes){
         '<div class="informe-footer">' +
           '<span class="informe-date">Generado por GECA Creativo</span>' +
           '<span class="informe-link">Ver informe &#8594;</span>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+function renderBiblioteca(items){
+  var container = document.getElementById('bibliotecaContainer');
+  container.innerHTML = '';
+
+  if(items.length === 0){
+    container.innerHTML = '<div class="empty-state"><div class="icon">&#128218;</div><p>A&#250;n no hay recursos disponibles.</p></div>';
+    return;
+  }
+
+  // Agrupar por mes
+  var porMes = {};
+  items.forEach(function(b){
+    var m = b.mes;
+    if(!porMes[m]) porMes[m] = [];
+    porMes[m].push(b);
+  });
+
+  Object.keys(porMes).sort(function(a,b){return b-a}).forEach(function(mes){
+    var lista = porMes[mes];
+    var section = document.createElement('div');
+    section.className = 'month-section';
+
+    var header = document.createElement('div');
+    header.className = 'month-header';
+    header.innerHTML =
+      '<h2 class="month-title">' + MESES[parseInt(mes)-1] + '</h2>' +
+      '<div class="month-line"></div>' +
+      '<span class="month-count">' + lista.length + ' recurso' + (lista.length > 1 ? 's' : '') + '</span>';
+    section.appendChild(header);
+
+    var grid = document.createElement('div');
+    grid.className = 'informes-grid';
+
+    lista.forEach(function(b){
+      var card = document.createElement('a');
+      card.className = 'informe-card';
+      card.href = b.enlace;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.innerHTML =
+        '<div class="informe-card-top">' +
+          '<div class="informe-icon">&#128218;</div>' +
+          '<span class="informe-badge">' + MESES[parseInt(mes)-1] + ' ' + b.anio + '</span>' +
+        '</div>' +
+        '<div class="informe-title">' + b.titulo + '</div>' +
+        (b.temas ? '<div class="informe-desc">' + b.temas + '</div>' : '') +
+        '<div class="informe-footer">' +
+          '<span class="informe-date">GECA Creativo</span>' +
+          '<span class="informe-link">Ver recurso &#8594;</span>' +
         '</div>';
       grid.appendChild(card);
     });
