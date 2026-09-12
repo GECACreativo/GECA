@@ -8,6 +8,10 @@
 <link rel="icon" href="favicon.png" type="image/png"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="export-utils.js"></script>
 <style>
 :root{--pink:#FF888F;--orange:#FF8805;--blue:#003C7E;--green:#1F5720;--ink:#0f0e0d;--cream:#faf8f4;--white:#ffffff;--gray:#5a5550;--border:rgba(0,60,126,.11);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -82,6 +86,25 @@ header{background:var(--ink);padding:1rem 2rem;display:flex;align-items:center;j
 .estado-publicada{background:rgba(31,87,32,.1);color:var(--green)}
 .estado-cerrada{background:rgba(255,136,143,.12);color:#c02535}
 .link-input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:.45rem .7rem;font-size:.78rem;font-family:monospace}
+.filters-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.filters-row input,.filters-row select{font-family:'Open Sans',sans-serif;font-size:.85rem;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.55rem .8rem;outline:none}
+.filters-row input[type="text"]{flex:1;min-width:180px}
+.chart-wrap{margin-bottom:.5rem}
+.chart-bar-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
+.chart-bar-label{width:160px;flex-shrink:0;font-size:.8rem;color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-bar-track{flex:1;height:20px;background:rgba(0,60,126,.08);border-radius:4px}
+.chart-bar-fill{height:100%;border-radius:4px;min-width:2px}
+.chart-bar-value{font-size:.78rem;font-weight:700;color:var(--ink);margin-left:.6rem;white-space:nowrap;width:42px;flex-shrink:0}
+.switch{position:relative;display:inline-block;width:40px;height:22px;vertical-align:middle;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;cursor:pointer;inset:0;background:#ccc;transition:.2s;border-radius:22px}
+.switch-slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:var(--white);transition:.2s;border-radius:50%}
+.switch input:checked + .switch-slider{background:var(--green)}
+.switch input:checked + .switch-slider:before{transform:translateX(18px)}
+.switch-row{display:flex;align-items:center;gap:.5rem}
+.likert-widget-static{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.likert-num-static{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Montserrat',sans-serif;font-size:.85rem;color:var(--ink)}
+.likert-num-static.selected{background:#FF888F;border-color:#FF888F;color:var(--white)}
 .preview-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1rem}
 .preview-num{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
 .preview-enunciado{font-weight:700;font-size:.95rem;margin-bottom:1rem;line-height:1.5}
@@ -260,6 +283,7 @@ tr:hover td{background:rgba(0,60,126,.02)}
     <div class="nav-item" data-page="nuevo-informe" onclick="showPage('nuevo-informe')"><span class="nav-icon">&#43;</span> Agregar Informe</div>
     <div class="nav-item" data-page="biblioteca" onclick="showPage('biblioteca')"><span class="nav-icon">&#128218;</span> Biblioteca de Recursos</div>
     <div class="nav-item" data-page="evaluaciones" onclick="showPage('evaluaciones')"><span class="nav-icon">&#128221;</span> Centro de Evaluaci&#243;n</div>
+    <div class="nav-item" data-page="dashboard-general" onclick="showPage('dashboard-general')"><span class="nav-icon">&#128200;</span> Dashboard General</div>
   </nav>
 
   <!-- CONTENT -->
@@ -511,6 +535,17 @@ tr:hover td{background:rgba(0,60,126,.02)}
             <label>Mensaje personalizado</label>
             <textarea id="ev-msg-personalizado" rows="2" placeholder="Ej: ¡Gracias por completar la evaluación de Liderazgo! Nos pondremos en contacto pronto."></textarea>
           </div>
+          <div class="form-row">
+            <div class="fg">
+              <label>Habilitada desde (opcional)</label>
+              <input type="datetime-local" id="ev-fecha-apertura"/>
+            </div>
+            <div class="fg">
+              <label>Habilitada hasta (opcional)</label>
+              <input type="datetime-local" id="ev-fecha-cierre"/>
+            </div>
+          </div>
+          <p style="font-size:.78rem;color:var(--gray);margin-top:-.5rem">Si dejas estos campos vac&#237;os, la evaluaci&#243;n estar&#225; disponible mientras est&#233; en estado "Publicada" y encendida, sin l&#237;mite de horario.</p>
         </div>
 
         <div class="card">
@@ -544,8 +579,50 @@ tr:hover td{background:rgba(0,60,126,.02)}
         <div class="card">
           <div id="tablaResultados"><div class="spinner"></div></div>
         </div>
-        <button class="btn-secondary" style="margin-left:0" onclick="cerrarResultados()">&#8592; Volver a evaluaciones</button>
+        <button class="btn-primary" onclick="exportarResultadosEvalExcel()">&#128190; Exportar Excel</button>
+        <button class="btn-secondary" onclick="exportarResultadosEvalCSV()">Exportar CSV</button>
+        <button class="btn-secondary" id="btnResultadosEvalPDF" onclick="exportarResultadosEvalPDF()">&#128196; Descargar PDF</button>
+        <button class="btn-secondary" onclick="cerrarResultados()">&#8592; Volver a evaluaciones</button>
       </div>
+    </div>
+
+    <!-- DASHBOARD GENERAL -->
+    <div class="page" id="page-dashboard-general">
+      <h1 class="page-title">Dashboard General de Evaluaciones</h1>
+      <p class="page-sub">Resultados consolidados de todas las evaluaciones, con filtros y exportaci&#243;n.</p>
+
+      <div class="card">
+        <div class="filters-row">
+          <select id="dg-filtro-evaluacion" onchange="aplicarFiltrosDashboard()"><option value="">Todas las evaluaciones</option></select>
+          <select id="dg-filtro-cliente" onchange="aplicarFiltrosDashboard()"><option value="">Todas las empresas</option></select>
+          <input type="text" id="dg-filtro-persona" placeholder="Buscar por nombre o correo..." oninput="aplicarFiltrosDashboard()"/>
+          <input type="date" id="dg-filtro-desde" onchange="aplicarFiltrosDashboard()"/>
+          <input type="date" id="dg-filtro-hasta" onchange="aplicarFiltrosDashboard()"/>
+          <button class="btn-secondary" style="margin:0" onclick="limpiarFiltrosDashboard()">Limpiar filtros</button>
+        </div>
+      </div>
+
+      <div id="dashboardGeneralReporte">
+        <div class="card">
+          <div class="stats-grid" id="dgStats"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Promedio por empresa</div>
+          <div id="dgChartEmpresas"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Promedio por evaluaci&#243;n</div>
+          <div id="dgChartEvaluaciones"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Resultados <span class="peso-indicador" id="dgConteo"></span></div>
+          <div id="dgTabla"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="exportarDashboardExcel()">&#128190; Exportar Excel</button>
+      <button class="btn-secondary" onclick="exportarDashboardCSV()">Exportar CSV</button>
+      <button class="btn-secondary" id="btnDashboardPDF" onclick="exportarDashboardPDF()">&#128196; Descargar PDF</button>
     </div>
 
   </div><!-- /content -->
@@ -592,6 +669,8 @@ var editingRecursoId = null;
 var editingEvaluacionId = null;
 var asignandoEvaluacionId = null;
 var builderPreguntas = [];
+var preguntasOriginalesIds = [];
+var preguntasOriginalesOpciones = {};
 
 async function adminLogin(){
   var email = document.getElementById('al-email').value.trim();
@@ -746,17 +825,23 @@ async function cargarEvaluaciones(){
     .order('created_at', {ascending:false});
   var data = r.data || [];
   if(data.length === 0){ cont.innerHTML = '<p class="empty">A&#250;n no has creado evaluaciones.</p>'; return; }
-  var html = '<div class="table-wrap"><table><thead><tr><th>T&#237;tulo</th><th>Estado</th><th>Preguntas</th><th>Clientes asignados</th><th>Acci&#243;n</th></tr></thead><tbody>';
+  var html = '<div class="table-wrap"><table><thead><tr><th>T&#237;tulo</th><th>Estado</th><th>Encendida</th><th>Horario</th><th>Preguntas</th><th>Clientes asignados</th><th>Acci&#243;n</th></tr></thead><tbody>';
   data.forEach(function(e){
     var nPreguntas = (e.evaluacion_preguntas && e.evaluacion_preguntas[0]) ? e.evaluacion_preguntas[0].count : 0;
     var nAsignados = (e.evaluacion_asignaciones && e.evaluacion_asignaciones[0]) ? e.evaluacion_asignaciones[0].count : 0;
     html += '<tr><td><strong>' + e.titulo + '</strong></td>';
     html += '<td><span class="estado-badge estado-' + e.estado + '">' + e.estado + '</span></td>';
+    html += '<td><label class="switch"><input type="checkbox" ' + (e.activa ? 'checked' : '') + ' onchange="toggleEvaluacionActiva(\'' + e.id + '\', this.checked)"/><span class="switch-slider"></span></label></td>';
+    html += '<td style="font-size:.75rem;color:var(--gray)">';
+    if(e.fecha_apertura) html += 'Desde: ' + new Date(e.fecha_apertura).toLocaleString('es-CO') + '<br/>';
+    if(e.fecha_cierre) html += 'Hasta: ' + new Date(e.fecha_cierre).toLocaleString('es-CO');
+    if(!e.fecha_apertura && !e.fecha_cierre) html += 'Sin l&#237;mite';
+    html += '</td>';
     html += '<td>' + nPreguntas + '</td><td>' + nAsignados + '</td>';
     html += '<td>';
     html += '<button class="btn-edit" onclick="previsualizarEvaluacionGuardada(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">&#128065; Vista previa</button>';
+    html += '<button class="btn-edit" onclick="editarEvaluacion(\'' + e.id + '\')">Editar</button>';
     if(e.estado === 'borrador'){
-      html += '<button class="btn-edit" onclick="editarEvaluacion(\'' + e.id + '\')">Editar</button>';
       html += '<button class="btn-edit" onclick="cambiarEstadoEvaluacion(\'' + e.id + '\',\'publicada\')">Publicar</button>';
     }
     if(e.estado === 'publicada'){
@@ -765,6 +850,7 @@ async function cargarEvaluaciones(){
       html += '<button class="btn-edit" onclick="cambiarEstadoEvaluacion(\'' + e.id + '\',\'cerrada\')">Cerrar</button>';
     }
     if(e.estado === 'cerrada'){
+      html += '<button class="btn-edit" onclick="cambiarEstadoEvaluacion(\'' + e.id + '\',\'publicada\')">Reabrir</button>';
       html += '<button class="btn-edit" onclick="abrirAsignar(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Ver enlaces</button>';
       html += '<button class="btn-edit" onclick="abrirResultados(\'' + e.id + '\',\'' + e.titulo.replace(/'/g,"\\'") + '\')">Resultados</button>';
     }
@@ -773,6 +859,12 @@ async function cargarEvaluaciones(){
   });
   html += '</tbody></table></div>';
   cont.innerHTML = html;
+}
+
+async function toggleEvaluacionActiva(id, nuevoValor){
+  var r = await sb.from('evaluaciones').update({activa:nuevoValor}).eq('id', id);
+  if(r.error){ toast('Error: ' + r.error.message, 'error'); cargarEvaluaciones(); return; }
+  toast(nuevoValor ? 'Evaluación encendida.' : 'Evaluación apagada temporalmente.');
 }
 
 async function cambiarEstadoEvaluacion(id, nuevoEstado){
@@ -789,6 +881,18 @@ async function eliminarEvaluacion(id){
   cargarEvaluaciones();
 }
 
+function isoToDatetimeLocal(iso){
+  if(!iso) return '';
+  var d = new Date(iso);
+  var pad = function(n){ return n < 10 ? '0' + n : n; };
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function datetimeLocalToISO(val){
+  if(!val) return null;
+  return new Date(val).toISOString();
+}
+
 function toggleMensajePersonalizado(){
   var check = document.getElementById('ev-msg-personalizado-check');
   document.getElementById('ev-msg-personalizado-wrap').style.display = check.checked ? 'block' : 'none';
@@ -797,6 +901,8 @@ function toggleMensajePersonalizado(){
 function nuevaEvaluacion(){
   editingEvaluacionId = null;
   builderPreguntas = [];
+  preguntasOriginalesIds = [];
+  preguntasOriginalesOpciones = {};
   document.getElementById('ev-titulo').value = '';
   document.getElementById('ev-descripcion').value = '';
   document.getElementById('ev-estado').value = 'borrador';
@@ -804,6 +910,8 @@ function nuevaEvaluacion(){
   document.getElementById('ev-msg-personalizado-check').checked = false;
   document.getElementById('ev-msg-personalizado').value = '';
   toggleMensajePersonalizado();
+  document.getElementById('ev-fecha-apertura').value = '';
+  document.getElementById('ev-fecha-cierre').value = '';
   document.getElementById('builderTitle').textContent = 'Nueva evaluación';
   showEvalView('builder');
   agregarPreguntaBuilder();
@@ -812,7 +920,6 @@ function nuevaEvaluacion(){
 async function editarEvaluacion(id){
   var evalRes = await sb.from('evaluaciones').select('*').eq('id', id).single();
   if(evalRes.error || !evalRes.data) return;
-  if(evalRes.data.estado !== 'borrador'){ toast('Solo se pueden editar evaluaciones en borrador.','error'); return; }
   var pregRes = await sb.from('evaluacion_preguntas').select('*, evaluacion_opciones(*)').eq('evaluacion_id', id).order('orden');
 
   editingEvaluacionId = id;
@@ -823,16 +930,28 @@ async function editarEvaluacion(id){
   document.getElementById('ev-msg-personalizado-check').checked = evalRes.data.usar_mensaje_personalizado;
   document.getElementById('ev-msg-personalizado').value = evalRes.data.mensaje_personalizado || '';
   toggleMensajePersonalizado();
+  document.getElementById('ev-fecha-apertura').value = isoToDatetimeLocal(evalRes.data.fecha_apertura);
+  document.getElementById('ev-fecha-cierre').value = isoToDatetimeLocal(evalRes.data.fecha_cierre);
+
+  var avisoRespuestas = evalRes.data.estado !== 'borrador';
+
+  preguntasOriginalesIds = (pregRes.data || []).map(function(p){ return p.id; });
+  preguntasOriginalesOpciones = {};
+  (pregRes.data || []).forEach(function(p){
+    preguntasOriginalesOpciones[p.id] = (p.evaluacion_opciones || []).map(function(o){ return o.id; });
+  });
 
   builderPreguntas = (pregRes.data || []).map(function(p){
     return {
+      id: p.id,
       tipo: p.tipo,
       enunciado: p.enunciado,
       peso: p.peso,
       categoria: p.categoria || '',
       retroalimentacion: p.retroalimentacion || '',
+      escala_tipo: p.escala_tipo || 'numeros',
       opciones: (p.evaluacion_opciones || []).slice().sort(function(a,b){ return a.orden - b.orden; }).map(function(o){
-        return {texto:o.texto, es_correcta:o.es_correcta};
+        return {id:o.id, texto:o.texto, es_correcta:o.es_correcta};
       })
     };
   });
@@ -840,6 +959,10 @@ async function editarEvaluacion(id){
   document.getElementById('builderTitle').textContent = 'Editar evaluación';
   showEvalView('builder');
   renderPreguntasBuilder();
+
+  if(avisoRespuestas){
+    toast('Esta evaluación ya está ' + evalRes.data.estado + '. Si quitas una pregunta que ya tiene respuestas, esas respuestas se perderán.');
+  }
 }
 
 function cerrarBuilder(){
@@ -856,19 +979,23 @@ function syncBuilderFromDOM(){
     if(categoriaInput) p.categoria = categoriaInput.value;
     var pesoInput = block.querySelector('.p-peso');
     if(pesoInput && !pesoInput.disabled) p.peso = parseFloat(pesoInput.value) || 0;
-    if(p.tipo !== 'abierta'){
+    if(p.tipo === 'opcion_unica' || p.tipo === 'opcion_multiple'){
       block.querySelectorAll('.opcion-row').forEach(function(row, j){
         if(p.opciones[j]) p.opciones[j].texto = row.querySelector('.o-texto').value;
       });
       var retroInput = block.querySelector('.p-retro');
       if(retroInput) p.retroalimentacion = retroInput.value;
     }
+    if(p.tipo === 'likert'){
+      var escalaInput = block.querySelector('.p-escala');
+      if(escalaInput) p.escala_tipo = escalaInput.value;
+    }
   });
 }
 
 function agregarPreguntaBuilder(){
   syncBuilderFromDOM();
-  builderPreguntas.push({tipo:'opcion_unica', enunciado:'', peso:0, categoria:'', retroalimentacion:'', opciones:[{texto:'',es_correcta:false},{texto:'',es_correcta:false}]});
+  builderPreguntas.push({id:null, tipo:'opcion_unica', enunciado:'', peso:0, categoria:'', retroalimentacion:'', escala_tipo:'numeros', opciones:[{id:null,texto:'',es_correcta:false},{id:null,texto:'',es_correcta:false}]});
   renderPreguntasBuilder();
 }
 
@@ -881,15 +1008,18 @@ function quitarPregunta(i){
 function cambiarTipoPregunta(i, tipo){
   syncBuilderFromDOM();
   builderPreguntas[i].tipo = tipo;
-  if(tipo !== 'abierta' && builderPreguntas[i].opciones.length === 0){
-    builderPreguntas[i].opciones = [{texto:'',es_correcta:false},{texto:'',es_correcta:false}];
+  if((tipo === 'opcion_unica' || tipo === 'opcion_multiple') && builderPreguntas[i].opciones.length === 0){
+    builderPreguntas[i].opciones = [{id:null,texto:'',es_correcta:false},{id:null,texto:'',es_correcta:false}];
+  }
+  if(tipo === 'likert' && !builderPreguntas[i].escala_tipo){
+    builderPreguntas[i].escala_tipo = 'numeros';
   }
   renderPreguntasBuilder();
 }
 
 function agregarOpcion(i){
   syncBuilderFromDOM();
-  builderPreguntas[i].opciones.push({texto:'', es_correcta:false});
+  builderPreguntas[i].opciones.push({id:null, texto:'', es_correcta:false});
   renderPreguntasBuilder();
 }
 
@@ -907,7 +1037,8 @@ function marcarCorrecta(i, j, el){
   builderPreguntas[i].opciones[j].es_correcta = el.checked;
 }
 
-var TIPO_LABELS = {abierta:'Respuesta abierta', opcion_unica:'Opción única', opcion_multiple:'Selección múltiple'};
+var TIPO_LABELS = {abierta:'Respuesta abierta', opcion_unica:'Opción única', opcion_multiple:'Selección múltiple', likert:'Escala Likert'};
+var ESCALA_LABELS = {numeros:'Números (1-5)', bombillo:'Bombillo', corazon:'Corazón', like:'Me gusta (pulgar arriba)'};
 
 function renderPreguntasBuilder(){
   var cont = document.getElementById('preguntasContainer');
@@ -917,7 +1048,7 @@ function renderPreguntasBuilder(){
     html += '<div class="pregunta-block-head"><strong>Pregunta ' + (i+1) + '</strong><button class="btn-danger" onclick="quitarPregunta(' + i + ')">Quitar</button></div>';
     html += '<div class="form-row">';
     html += '<div class="fg"><label>Tipo</label><select class="p-tipo" onchange="cambiarTipoPregunta(' + i + ', this.value)">';
-    ['abierta','opcion_unica','opcion_multiple'].forEach(function(t){
+    ['abierta','opcion_unica','opcion_multiple','likert'].forEach(function(t){
       html += '<option value="' + t + '"' + (p.tipo===t ? ' selected' : '') + '>' + TIPO_LABELS[t] + '</option>';
     });
     html += '</select></div>';
@@ -925,7 +1056,7 @@ function renderPreguntasBuilder(){
     html += '</div>';
     html += '<div class="fg"><label>Enunciado</label><textarea class="p-enunciado" rows="2" placeholder="Escribe la pregunta...">' + (p.enunciado||'') + '</textarea></div>';
     html += '<div class="fg"><label>Categor&#237;a (opcional)</label><input type="text" class="p-categoria" value="' + (p.categoria||'').replace(/"/g,'&quot;') + '" placeholder="Ej: Liderazgo, Comunicaci&#243;n..."/></div>';
-    if(p.tipo !== 'abierta'){
+    if(p.tipo === 'opcion_unica' || p.tipo === 'opcion_multiple'){
       html += '<div class="fg"><label>Opciones (marca la' + (p.tipo==='opcion_multiple'?'s':'') + ' correcta' + (p.tipo==='opcion_multiple'?'s':'') + ')</label>';
       p.opciones.forEach(function(o, j){
         html += '<div class="opcion-row">';
@@ -936,6 +1067,14 @@ function renderPreguntasBuilder(){
       });
       html += '<button class="btn-edit" onclick="agregarOpcion(' + i + ')">&#43; Agregar opción</button></div>';
       html += '<div class="fg"><label>Retroalimentaci&#243;n si responde correctamente (opcional)</label><textarea class="p-retro" rows="2" placeholder="Ej: ¡Correcto! Esa es la actitud clave para liderar equipos.">' + (p.retroalimentacion||'') + '</textarea></div>';
+    }
+    if(p.tipo === 'likert'){
+      html += '<div class="fg"><label>Estilo de la escala (1 a 5)</label><select class="p-escala">';
+      ['numeros','bombillo','corazon','like'].forEach(function(t){
+        html += '<option value="' + t + '"' + ((p.escala_tipo||'numeros')===t ? ' selected' : '') + '>' + ESCALA_LABELS[t] + '</option>';
+      });
+      html += '</select></div>';
+      html += '<p style="font-size:.78rem;color:var(--gray);margin-top:-.5rem">Se califica autom&#225;ticamente de forma proporcional: 5/5 = puntaje completo, 1/5 = 20% del puntaje.</p>';
     }
     html += '</div>';
   });
@@ -967,14 +1106,17 @@ async function guardarEvaluacion(){
   var ponderacionAuto = document.getElementById('ev-ponderacion-auto').checked;
   var usarMsgPersonalizado = document.getElementById('ev-msg-personalizado-check').checked;
   var msgPersonalizado = document.getElementById('ev-msg-personalizado').value.trim();
+  var fechaAperturaVal = document.getElementById('ev-fecha-apertura').value;
+  var fechaCierreVal = document.getElementById('ev-fecha-cierre').value;
 
   if(!titulo){ toast('El título es obligatorio.','error'); return; }
   if(usarMsgPersonalizado && !msgPersonalizado){ toast('Escribe el mensaje personalizado o desactiva esa opción.','error'); return; }
+  if(fechaAperturaVal && fechaCierreVal && fechaAperturaVal >= fechaCierreVal){ toast('La fecha de cierre debe ser posterior a la de apertura.','error'); return; }
   if(builderPreguntas.length === 0){ toast('Agrega al menos una pregunta.','error'); return; }
   for(var idx=0; idx<builderPreguntas.length; idx++){
     var p = builderPreguntas[idx];
     if(!p.enunciado.trim()){ toast('La pregunta ' + (idx+1) + ' necesita un enunciado.','error'); return; }
-    if(p.tipo !== 'abierta'){
+    if(p.tipo === 'opcion_unica' || p.tipo === 'opcion_multiple'){
       if(p.opciones.length < 2){ toast('La pregunta ' + (idx+1) + ' necesita al menos 2 opciones.','error'); return; }
       if(!p.opciones.some(function(o){ return o.es_correcta; })){ toast('Marca la opción correcta en la pregunta ' + (idx+1) + '.','error'); return; }
       if(p.opciones.some(function(o){ return !o.texto.trim(); })){ toast('Completa el texto de todas las opciones en la pregunta ' + (idx+1) + '.','error'); return; }
@@ -986,13 +1128,20 @@ async function guardarEvaluacion(){
     builderPreguntas.forEach(function(p){ p.peso = pesoIgual; });
   }
 
-  var evalPayload = {titulo:titulo, descripcion:descripcion, estado:estado, ponderacion_automatica:ponderacionAuto, usar_mensaje_personalizado:usarMsgPersonalizado, mensaje_personalizado:usarMsgPersonalizado ? msgPersonalizado : null};
+  var evalPayload = {titulo:titulo, descripcion:descripcion, estado:estado, ponderacion_automatica:ponderacionAuto, usar_mensaje_personalizado:usarMsgPersonalizado, mensaje_personalizado:usarMsgPersonalizado ? msgPersonalizado : null, fecha_apertura:datetimeLocalToISO(fechaAperturaVal), fecha_cierre:datetimeLocalToISO(fechaCierreVal)};
+
+  // Preguntas que ya no están en el constructor: si se borran, se pierden sus respuestas.
+  var idsActuales = builderPreguntas.filter(function(p){ return p.id; }).map(function(p){ return p.id; });
+  var idsABorrar = preguntasOriginalesIds.filter(function(id){ return idsActuales.indexOf(id) === -1; });
+  if(idsABorrar.length > 0){
+    var msg = 'Vas a eliminar ' + idsABorrar.length + ' pregunta' + (idsABorrar.length===1?'':'s') + '. Si ya hay respuestas registradas para ' + (idsABorrar.length===1?'esa pregunta':'esas preguntas') + ', se perderán junto con su calificación. ¿Continuar?';
+    if(!confirm(msg)) return;
+  }
 
   var evalId = editingEvaluacionId;
   if(evalId){
     var updR = await sb.from('evaluaciones').update(evalPayload).eq('id', evalId);
     if(updR.error){ toast('Error al actualizar: ' + updR.error.message,'error'); return; }
-    await sb.from('evaluacion_preguntas').delete().eq('evaluacion_id', evalId);
   } else {
     var insEval = await sb.from('evaluaciones').insert(evalPayload).select().single();
     if(insEval.error){ toast('Error al crear evaluación: ' + insEval.error.message,'error'); return; }
@@ -1002,14 +1151,50 @@ async function guardarEvaluacion(){
   for(var i=0; i<builderPreguntas.length; i++){
     var pr = builderPreguntas[i];
     var pregPayload = {evaluacion_id:evalId, orden:i, tipo:pr.tipo, enunciado:pr.enunciado.trim(), peso:pr.peso, categoria:(pr.categoria||'').trim() || null};
-    if(pr.tipo !== 'abierta') pregPayload.retroalimentacion = (pr.retroalimentacion||'').trim() || null;
-    var insP = await sb.from('evaluacion_preguntas').insert(pregPayload).select().single();
-    if(insP.error){ toast('Error al guardar la pregunta ' + (i+1) + ': ' + insP.error.message,'error'); return; }
-    if(pr.tipo !== 'abierta'){
-      var opcionesPayload = pr.opciones.map(function(o, j){ return {pregunta_id:insP.data.id, texto:o.texto.trim(), es_correcta:o.es_correcta, orden:j}; });
-      var insO = await sb.from('evaluacion_opciones').insert(opcionesPayload);
-      if(insO.error){ toast('Error al guardar opciones: ' + insO.error.message,'error'); return; }
+    pregPayload.retroalimentacion = (pr.tipo === 'opcion_unica' || pr.tipo === 'opcion_multiple') ? ((pr.retroalimentacion||'').trim() || null) : null;
+    pregPayload.escala_tipo = pr.tipo === 'likert' ? (pr.escala_tipo || 'numeros') : null;
+
+    var preguntaId;
+    if(pr.id){
+      var updP = await sb.from('evaluacion_preguntas').update(pregPayload).eq('id', pr.id);
+      if(updP.error){ toast('Error al actualizar la pregunta ' + (i+1) + ': ' + updP.error.message,'error'); return; }
+      preguntaId = pr.id;
+    } else {
+      var insP = await sb.from('evaluacion_preguntas').insert(pregPayload).select().single();
+      if(insP.error){ toast('Error al guardar la pregunta ' + (i+1) + ': ' + insP.error.message,'error'); return; }
+      preguntaId = insP.data.id;
+      pr.id = preguntaId;
     }
+
+    var opcionesOriginales = preguntasOriginalesOpciones[preguntaId] || [];
+    if(pr.tipo === 'opcion_unica' || pr.tipo === 'opcion_multiple'){
+      var opcionesActualesIds = [];
+      for(var j=0; j<pr.opciones.length; j++){
+        var o = pr.opciones[j];
+        var opPayload = {pregunta_id:preguntaId, texto:o.texto.trim(), es_correcta:o.es_correcta, orden:j};
+        if(o.id){
+          var updO = await sb.from('evaluacion_opciones').update(opPayload).eq('id', o.id);
+          if(updO.error){ toast('Error al actualizar opciones: ' + updO.error.message,'error'); return; }
+          opcionesActualesIds.push(o.id);
+        } else {
+          var insO = await sb.from('evaluacion_opciones').insert(opPayload).select().single();
+          if(insO.error){ toast('Error al guardar opciones: ' + insO.error.message,'error'); return; }
+          o.id = insO.data.id;
+          opcionesActualesIds.push(o.id);
+        }
+      }
+      var opcionesABorrar = opcionesOriginales.filter(function(id){ return opcionesActualesIds.indexOf(id) === -1; });
+      if(opcionesABorrar.length){
+        await sb.from('evaluacion_opciones').delete().in('id', opcionesABorrar);
+      }
+    } else if(opcionesOriginales.length){
+      // la pregunta cambió de opción(es) a abierta o likert: sus opciones viejas ya no aplican
+      await sb.from('evaluacion_opciones').delete().eq('pregunta_id', preguntaId);
+    }
+  }
+
+  if(idsABorrar.length){
+    await sb.from('evaluacion_preguntas').delete().in('id', idsABorrar);
   }
 
   toast('Evaluación guardada correctamente.');
@@ -1028,6 +1213,34 @@ function cerrarAsignar(){
   cargarEvaluaciones();
 }
 
+function iconoLikertHTML(escala, encendido){
+  if(escala === 'numeros') return '';
+  var color = encendido ? '#FF888F' : 'none';
+  var stroke = encendido ? '#FF888F' : '#b7b2ac';
+  if(escala === 'corazon'){
+    return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 21s-8-5.5-8-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-8 11-8 11z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  }
+  if(escala === 'like'){
+    return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M7 22V11l5-8 1.2.9-1 6.1H18a2 2 0 0 1 1.95 2.44l-1.4 7A2 2 0 0 1 16.6 21H7z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><rect x="3" y="11" width="4" height="11" rx="1" fill="'+(encendido?color:'none')+'" stroke="'+stroke+'" stroke-width="1.6"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.35.8.9.8 1.5V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1.2c0-.6.3-1.15.8-1.5A6.5 6.5 0 0 0 12 2.5z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/><line x1="9.5" y1="20.5" x2="14.5" y2="20.5" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="18.3" x2="14" y2="18.3" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/></svg>';
+}
+
+function renderLikertEstatico(escala, valorSeleccionado){
+  escala = escala || 'numeros';
+  var html = '<div class="likert-widget-static">';
+  for(var v=1; v<=5; v++){
+    var encendido = valorSeleccionado ? v <= valorSeleccionado : false;
+    if(escala === 'numeros'){
+      html += '<div class="likert-num-static' + (valorSeleccionado===v ? ' selected' : '') + '">' + v + '</div>';
+    } else {
+      html += iconoLikertHTML(escala, encendido);
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
 function renderPreviewPreguntas(preguntas){
   if(!preguntas || preguntas.length === 0) return '<p class="empty">Esta evaluación todavía no tiene preguntas.</p>';
   var html = '';
@@ -1037,6 +1250,8 @@ function renderPreviewPreguntas(preguntas){
     html += '<div class="preview-enunciado">' + (p.enunciado || '(sin enunciado)') + '</div>';
     if(p.tipo === 'abierta'){
       html += '<textarea class="preview-input" rows="3" placeholder="Respuesta abierta (calificación manual)" disabled></textarea>';
+    } else if(p.tipo === 'likert'){
+      html += renderLikertEstatico(p.escala_tipo, null);
     } else {
       html += '<div class="preview-opciones">';
       (p.opciones || []).forEach(function(o){
@@ -1126,6 +1341,11 @@ async function cargarAsignaciones(){
 }
 
 var resultadosEvalId = null;
+var resultadosData = [];
+var resultadosPreguntas = [];
+var resultadosRespuestasPorIntento = {};
+var resultadosOpcionesPorPregunta = {};
+var resultadosSeleccionadasPorRespuesta = {};
 var detalleIntentoId = null;
 
 async function abrirResultados(evalId, titulo){
@@ -1149,6 +1369,41 @@ async function cargarResultados(){
     .eq('evaluacion_asignaciones.evaluacion_id', resultadosEvalId)
     .order('enviado_en', {ascending:false});
   var data = r.data || [];
+  resultadosData = data;
+
+  resultadosPreguntas = [];
+  resultadosRespuestasPorIntento = {};
+  resultadosOpcionesPorPregunta = {};
+  resultadosSeleccionadasPorRespuesta = {};
+  if(data.length){
+    var pregRes = await sb.from('evaluacion_preguntas').select('*').eq('evaluacion_id', resultadosEvalId).order('orden');
+    resultadosPreguntas = pregRes.data || [];
+
+    var preguntaIds = resultadosPreguntas.map(function(p){ return p.id; });
+    if(preguntaIds.length){
+      var opRes = await sb.from('evaluacion_opciones').select('*').in('pregunta_id', preguntaIds).order('orden');
+      (opRes.data || []).forEach(function(o){
+        if(!resultadosOpcionesPorPregunta[o.pregunta_id]) resultadosOpcionesPorPregunta[o.pregunta_id] = [];
+        resultadosOpcionesPorPregunta[o.pregunta_id].push(o);
+      });
+    }
+
+    var intentoIds = data.map(function(i){ return i.id; });
+    var respRes = await sb.from('evaluacion_respuestas').select('*').in('intento_id', intentoIds);
+    var respuestas = respRes.data || [];
+    respuestas.forEach(function(resp){
+      if(!resultadosRespuestasPorIntento[resp.intento_id]) resultadosRespuestasPorIntento[resp.intento_id] = [];
+      resultadosRespuestasPorIntento[resp.intento_id].push(resp);
+    });
+    var respuestaIds = respuestas.map(function(resp){ return resp.id; });
+    if(respuestaIds.length){
+      var roRes = await sb.from('evaluacion_respuesta_opciones').select('*').in('respuesta_id', respuestaIds);
+      (roRes.data || []).forEach(function(ro){
+        if(!resultadosSeleccionadasPorRespuesta[ro.respuesta_id]) resultadosSeleccionadasPorRespuesta[ro.respuesta_id] = [];
+        resultadosSeleccionadasPorRespuesta[ro.respuesta_id].push(ro.opcion_id);
+      });
+    }
+  }
 
   var calificadas = data.filter(function(i){ return i.estado === 'calificada'; });
   var promedio = calificadas.length
@@ -1171,6 +1426,199 @@ async function cargarResultados(){
   });
   html += '</tbody></table></div>';
   cont.innerHTML = html;
+}
+
+function respuestaTextoPreguntaResultados(r, p){
+  if(!r) return '';
+  if(p.tipo === 'abierta') return r.respuesta_texto || '';
+  if(p.tipo === 'likert') return r.respuesta_texto ? (r.respuesta_texto + ' / 5') : '';
+  var seleccionadas = resultadosSeleccionadasPorRespuesta[r.id] || [];
+  var opciones = resultadosOpcionesPorPregunta[p.id] || [];
+  return opciones.filter(function(o){ return seleccionadas.indexOf(o.id) !== -1; }).map(function(o){ return o.texto; }).join('; ');
+}
+
+function encabezadosResultadosEval(){
+  var headers = ['Cliente','Nombre','Correo','Fecha','Hora'];
+  resultadosPreguntas.forEach(function(p, idx){
+    var corto = p.enunciado.length > 50 ? p.enunciado.substring(0,50) + '...' : p.enunciado;
+    headers.push('P' + (idx+1) + ': ' + corto);
+    headers.push('P' + (idx+1) + ' - Puntaje');
+  });
+  headers.push('Puntaje Total');
+  headers.push('Estado');
+  return headers;
+}
+
+function filasResultadosEval(){
+  return resultadosData.map(function(i){
+    var empresa = (i.evaluacion_asignaciones && i.evaluacion_asignaciones.clientes) ? i.evaluacion_asignaciones.clientes.empresa : '-';
+    var fecha = new Date(i.enviado_en);
+    var fila = [empresa, i.nombre, i.correo, fecha.toLocaleDateString('es-CO'), fecha.toLocaleTimeString('es-CO')];
+    var respuestasIntento = resultadosRespuestasPorIntento[i.id] || [];
+    resultadosPreguntas.forEach(function(p){
+      var r = respuestasIntento.filter(function(x){ return x.pregunta_id === p.id; })[0];
+      fila.push(respuestaTextoPreguntaResultados(r, p));
+      fila.push(r && r.puntaje_obtenido !== null && r.puntaje_obtenido !== undefined ? r.puntaje_obtenido : '');
+    });
+    fila.push(i.puntaje_total !== null ? i.puntaje_total : '');
+    fila.push(i.estado === 'calificada' ? 'Calificada' : 'Pendiente');
+    return fila;
+  });
+}
+
+function exportarResultadosEvalExcel(){
+  var titulo = document.getElementById('resultadosEvalTitulo').textContent;
+  gecaExportExcel(gecaSlug(titulo) + '.xlsx', titulo, encabezadosResultadosEval(), filasResultadosEval());
+}
+
+function exportarResultadosEvalCSV(){
+  var titulo = document.getElementById('resultadosEvalTitulo').textContent;
+  gecaExportCSV(gecaSlug(titulo) + '.csv', encabezadosResultadosEval(), filasResultadosEval());
+}
+
+async function exportarResultadosEvalPDF(){
+  var titulo = document.getElementById('resultadosEvalTitulo').textContent;
+  await gecaExportPDF(gecaSlug(titulo) + '.pdf', 'evalResultadosView', document.getElementById('btnResultadosEvalPDF'));
+}
+
+/* ══════════════ DASHBOARD GENERAL ══════════════ */
+
+var DG_data = [];
+var DG_filtrados = [];
+
+async function cargarDashboardGeneral(){
+  var evalRes = await sb.from('evaluaciones').select('id, titulo').order('titulo');
+  var evaluacionesTodas = evalRes.data || [];
+  var selEval = document.getElementById('dg-filtro-evaluacion');
+  selEval.innerHTML = '<option value="">Todas las evaluaciones</option>' + evaluacionesTodas.map(function(e){ return '<option value="' + e.id + '">' + e.titulo + '</option>'; }).join('');
+
+  var selCliente = document.getElementById('dg-filtro-cliente');
+  selCliente.innerHTML = '<option value="">Todas las empresas</option>' + clientesCache.map(function(c){ return '<option value="' + c.id + '">' + c.empresa + '</option>'; }).join('');
+
+  document.getElementById('dgTabla').innerHTML = '<div class="spinner"></div>';
+
+  var r = await sb.from('evaluacion_intentos')
+    .select('*, evaluacion_asignaciones(evaluacion_id, cliente_id, evaluaciones(titulo), clientes(empresa))')
+    .order('enviado_en', {ascending:false});
+
+  DG_data = (r.data || []).map(function(i){
+    var asig = i.evaluacion_asignaciones;
+    return {
+      id: i.id, nombre: i.nombre, correo: i.correo,
+      puntaje_total: i.puntaje_total, estado: i.estado, enviado_en: i.enviado_en,
+      evaluacion_id: asig ? asig.evaluacion_id : null,
+      evaluacion_titulo: (asig && asig.evaluaciones) ? asig.evaluaciones.titulo : '-',
+      cliente_id: asig ? asig.cliente_id : null,
+      empresa: (asig && asig.clientes) ? asig.clientes.empresa : '-'
+    };
+  });
+
+  aplicarFiltrosDashboard();
+}
+
+function aplicarFiltrosDashboard(){
+  var evalId = document.getElementById('dg-filtro-evaluacion').value;
+  var clienteId = document.getElementById('dg-filtro-cliente').value;
+  var persona = document.getElementById('dg-filtro-persona').value.toLowerCase().trim();
+  var desde = document.getElementById('dg-filtro-desde').value;
+  var hasta = document.getElementById('dg-filtro-hasta').value;
+
+  DG_filtrados = DG_data.filter(function(i){
+    if(evalId && i.evaluacion_id !== evalId) return false;
+    if(clienteId && i.cliente_id !== clienteId) return false;
+    if(persona && i.nombre.toLowerCase().indexOf(persona) === -1 && i.correo.toLowerCase().indexOf(persona) === -1) return false;
+    if(desde && i.enviado_en < desde) return false;
+    if(hasta && i.enviado_en > (hasta + 'T23:59:59')) return false;
+    return true;
+  });
+
+  renderDashboardGeneral();
+}
+
+function limpiarFiltrosDashboard(){
+  document.getElementById('dg-filtro-evaluacion').value = '';
+  document.getElementById('dg-filtro-cliente').value = '';
+  document.getElementById('dg-filtro-persona').value = '';
+  document.getElementById('dg-filtro-desde').value = '';
+  document.getElementById('dg-filtro-hasta').value = '';
+  aplicarFiltrosDashboard();
+}
+
+function renderBarChartAgrupado(calificadas, campo){
+  var totales = {};
+  var orden = [];
+  calificadas.forEach(function(i){
+    var key = i[campo] || 'Sin dato';
+    if(!totales[key]){ totales[key] = {suma:0, n:0}; orden.push(key); }
+    totales[key].suma += (i.puntaje_total || 0);
+    totales[key].n++;
+  });
+  if(orden.length === 0) return '<p class="empty">No hay datos calificados para graficar.</p>';
+  var html = '<div class="chart-wrap">';
+  orden.forEach(function(key){
+    var prom = totales[key].suma / totales[key].n;
+    var pct = Math.round(prom);
+    var color = pct >= 70 ? 'var(--green)' : (pct >= 40 ? 'var(--orange)' : '#c02535');
+    html += '<div class="chart-bar-row"><div class="chart-bar-label" title="' + key + '">' + key + '</div>';
+    html += '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + Math.min(pct,100) + '%;background:' + color + '"></div></div>';
+    html += '<div class="chart-bar-value">' + pct + '</div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderDashboardGeneral(){
+  var data = DG_filtrados;
+  var calificadas = data.filter(function(i){ return i.estado === 'calificada'; });
+  var promedio = calificadas.length ? (calificadas.reduce(function(s,i){ return s + (i.puntaje_total||0); }, 0) / calificadas.length).toFixed(1) : '-';
+  var empresasUnicas = new Set(data.map(function(i){ return i.empresa; })).size;
+
+  document.getElementById('dgStats').innerHTML =
+    '<div class="stat-card"><div class="stat-num">' + data.length + '</div><div class="stat-label">Resultados</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + empresasUnicas + '</div><div class="stat-label">Empresas</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + (data.length - calificadas.length) + '</div><div class="stat-label">Pendientes de calificar</div></div>' +
+    '<div class="stat-card"><div class="stat-num">' + promedio + '</div><div class="stat-label">Promedio general</div></div>';
+
+  document.getElementById('dgChartEmpresas').innerHTML = renderBarChartAgrupado(calificadas, 'empresa');
+  document.getElementById('dgChartEvaluaciones').innerHTML = renderBarChartAgrupado(calificadas, 'evaluacion_titulo');
+
+  document.getElementById('dgConteo').textContent = '· ' + data.length + ' resultado' + (data.length === 1 ? '' : 's');
+
+  if(data.length === 0){
+    document.getElementById('dgTabla').innerHTML = '<p class="empty">No hay resultados con estos filtros.</p>';
+    return;
+  }
+
+  var html = '<div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Evaluaci&#243;n</th><th>Nombre</th><th>Correo</th><th>Puntaje</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>';
+  data.forEach(function(i){
+    html += '<tr><td>' + i.empresa + '</td><td>' + i.evaluacion_titulo + '</td><td>' + i.nombre + '</td><td class="td-email">' + i.correo + '</td>';
+    html += '<td>' + (i.puntaje_total !== null ? i.puntaje_total : '-') + '</td>';
+    html += '<td><span class="estado-badge ' + (i.estado === 'calificada' ? 'estado-publicada' : 'estado-borrador') + '">' + (i.estado === 'calificada' ? 'Calificada' : 'Pendiente') + '</span></td>';
+    html += '<td>' + new Date(i.enviado_en).toLocaleDateString('es-CO') + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('dgTabla').innerHTML = html;
+}
+
+var DASHBOARD_HEADERS = ['Empresa','Evaluación','Nombre','Correo','Fecha','Hora','Puntaje','Estado'];
+
+function filasDashboardGeneral(){
+  return DG_filtrados.map(function(i){
+    var fecha = new Date(i.enviado_en);
+    return [i.empresa, i.evaluacion_titulo, i.nombre, i.correo, fecha.toLocaleDateString('es-CO'), fecha.toLocaleTimeString('es-CO'), i.puntaje_total !== null ? i.puntaje_total : '', i.estado === 'calificada' ? 'Calificada' : 'Pendiente'];
+  });
+}
+
+function exportarDashboardExcel(){
+  gecaExportExcel('dashboard_evaluaciones.xlsx', 'Resultados', DASHBOARD_HEADERS, filasDashboardGeneral());
+}
+
+function exportarDashboardCSV(){
+  gecaExportCSV('dashboard_evaluaciones.csv', DASHBOARD_HEADERS, filasDashboardGeneral());
+}
+
+async function exportarDashboardPDF(){
+  await gecaExportPDF('dashboard_evaluaciones.pdf', 'dashboardGeneralReporte', document.getElementById('btnDashboardPDF'));
 }
 
 async function abrirDetalleIntento(intentoId){
@@ -1208,6 +1656,10 @@ async function abrirDetalleIntento(intentoId){
         html += '<input type="number" class="grade-input" data-respuesta="' + r.id + '" min="0" max="' + p.peso + '" step="0.5" value="' + (r.puntaje_obtenido !== null ? r.puntaje_obtenido : '') + '" style="width:120px;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .7rem;margin-bottom:.8rem"/>';
         html += '<label style="display:block;font-family:\'Montserrat\',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:.4rem">Retroalimentaci&#243;n para esta persona (opcional)</label>';
         html += '<textarea class="grade-retro" data-respuesta="' + r.id + '" rows="2" placeholder="Comparte una observación sobre esta respuesta..." style="width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:.6rem .8rem;font-family:\'Open Sans\',sans-serif;font-size:.85rem">' + (r.retroalimentacion || '') + '</textarea>';
+      } else if(p.tipo === 'likert'){
+        var valorLikert = r.respuesta_texto ? parseInt(r.respuesta_texto) : null;
+        html += renderLikertEstatico(p.escala_tipo, valorLikert);
+        html += '<p style="margin-top:.6rem;font-size:.8rem;color:var(--gray)">Valor elegido: <strong>' + (valorLikert || '&#8212;') + ' / 5</strong> &middot; Puntaje: <strong>' + (r.puntaje_obtenido || 0) + ' / ' + p.peso + '</strong></p>';
       } else {
         var seleccionadas = (r.evaluacion_respuesta_opciones || []).map(function(x){ return x.opcion_id; });
         var opcionesPregunta = todasOpciones.filter(function(o){ return o.pregunta_id === p.id; });
@@ -1462,6 +1914,7 @@ function showPage(id){
   if(id==='informes') cargarInformesTabla();
   if(id==='biblioteca') cargarBibliotecaTabla();
   if(id==='evaluaciones'){ showEvalView('lista'); cargarEvaluaciones(); }
+  if(id==='dashboard-general') cargarDashboardGeneral();
 }
 
 function toast(msg, tipo){

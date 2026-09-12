@@ -8,6 +8,10 @@
 <link rel="icon" href="favicon.png" type="image/png"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="export-utils.js"></script>
 <style>
 :root{--pink:#FF888F;--orange:#FF8805;--yellow:#FFEF8F;--blue:#003C7E;--green:#1F5720;--ink:#0f0e0d;--cream:#faf8f4;--white:#ffffff;--gray:#5a5550;--border:rgba(0,60,126,.11);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -22,6 +26,12 @@ header{background:var(--ink);padding:1rem 2rem;display:flex;align-items:center;j
 .user-name{font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.04em}
 .btn-logout{background:rgba(255,136,143,.15);border:1px solid rgba(255,136,143,.3);color:var(--pink);padding:.4rem 1rem;border-radius:100px;font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:.04em}
 .btn-logout:hover{background:rgba(255,136,143,.25)}
+.btn-primary{background:linear-gradient(135deg,var(--blue),#00509e);color:var(--white);border:none;border-radius:100px;padding:.7rem 1.4rem;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;letter-spacing:.02em;margin:0 .5rem .5rem 0}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,60,126,.25)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-secondary{background:rgba(0,0,0,.05);color:var(--gray);border:1px solid var(--border);border-radius:100px;padding:.7rem 1.4rem;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;margin:0 .5rem .5rem 0}
+.btn-secondary:hover{background:rgba(0,0,0,.1)}
+.btn-secondary:disabled{opacity:.6;cursor:not-allowed}
 .accent-bar{height:4px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))}
 
 /* MAIN */
@@ -113,6 +123,9 @@ tr.clickable:hover td{background:rgba(0,60,126,.04)}
 .detail-opciones{display:flex;flex-direction:column;gap:.4rem}
 .detail-opcion{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.6rem .8rem;font-size:.82rem}
 .detail-feedback{margin-top:.6rem;background:rgba(31,87,32,.08);border:1px solid rgba(31,87,32,.2);border-radius:8px;padding:.6rem .8rem;font-size:.8rem;color:var(--green)}
+.likert-widget-static{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.likert-num-static{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Montserrat',sans-serif;font-size:.85rem;color:var(--ink)}
+.likert-num-static.selected{background:#FF888F;border-color:#FF888F;color:var(--white)}
 
 /* Estado vacío */
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--gray)}
@@ -179,6 +192,11 @@ tr.clickable:hover td{background:rgba(0,60,126,.04)}
     </div>
 
     <div id="vistaEvaluaciones" style="display:none">
+      <div id="evaluacionesConsolidadoBtns" style="display:none;margin-bottom:1.5rem">
+        <button class="btn-primary" onclick="exportarConsolidadoExcel()">&#128190; Exportar consolidado (Excel)</button>
+        <button class="btn-secondary" onclick="exportarConsolidadoCSV()">Exportar consolidado (CSV)</button>
+        <button class="btn-secondary" id="btnConsolidadoPDF" onclick="exportarConsolidadoPDF()">&#128196; Descargar consolidado (PDF)</button>
+      </div>
       <div id="evaluacionesContainer"></div>
     </div>
   </div>
@@ -311,10 +329,15 @@ async function init(){
 }
 
 var G_intentosPorAsignacion = {};
+var G_filtradosPorAsignacion = {};
+var G_evaluacionIdPorAsignacion = {};
 
 function renderEvaluaciones(asignaciones, intentosPorAsignacion){
   var cont = document.getElementById('evaluacionesContainer');
   G_intentosPorAsignacion = intentosPorAsignacion;
+
+  var hayRespuestas = asignaciones.some(function(a){ return (intentosPorAsignacion[a.id] || []).length > 0; });
+  document.getElementById('evaluacionesConsolidadoBtns').style.display = hayRespuestas ? 'block' : 'none';
 
   if(asignaciones.length === 0){
     cont.innerHTML = '<div class="empty-state"><div class="icon">&#128221;</div><p>No tienes evaluaciones asignadas todav&#237;a.</p></div>';
@@ -324,6 +347,7 @@ function renderEvaluaciones(asignaciones, intentosPorAsignacion){
   var html = '';
   asignaciones.forEach(function(a){
     var ev = a.evaluaciones;
+    G_evaluacionIdPorAsignacion[a.id] = a.evaluacion_id;
     var intentos = intentosPorAsignacion[a.id] || [];
     var calificadas = intentos.filter(function(i){ return i.estado === 'calificada'; });
     var promedio = calificadas.length
@@ -359,6 +383,14 @@ function renderEvaluaciones(asignaciones, intentosPorAsignacion){
     html += '</div>';
 
     html += '<div id="tabla-' + a.id + '"></div>';
+
+    var tituloEsc = ev.titulo.replace(/'/g, "\\'");
+    html += '<div style="margin-top:1rem">';
+    html += '<button class="btn-primary" onclick="exportarEvaluacionExcel(\'' + a.id + '\',\'' + tituloEsc + '\')">&#128190; Excel</button>';
+    html += '<button class="btn-secondary" onclick="exportarEvaluacionCSV(\'' + a.id + '\',\'' + tituloEsc + '\')">CSV</button>';
+    html += '<button class="btn-secondary" id="btnPDF-' + a.id + '" onclick="exportarEvaluacionPDF(\'' + a.id + '\',\'' + tituloEsc + '\')">&#128196; Descargar PDF</button>';
+    html += '</div>';
+
     html += '</div>';
   });
 
@@ -420,6 +452,8 @@ function renderTablaParticipantes(asignacionId, intentos){
     return coincideBusqueda && coincideEstado;
   });
 
+  G_filtradosPorAsignacion[asignacionId] = filtrados;
+
   var cont = document.getElementById('tabla-' + asignacionId);
   if(filtrados.length === 0){
     cont.innerHTML = '<p class="empty" style="padding:2rem;text-align:center;color:var(--gray);font-family:\'Montserrat\',sans-serif;font-size:.85rem">Ning&#250;n resultado coincide con el filtro.</p>';
@@ -434,6 +468,32 @@ function renderTablaParticipantes(asignacionId, intentos){
   });
   html += '</tbody></table></div>';
   cont.innerHTML = html;
+}
+
+function iconoLikertHTML(escala, encendido){
+  var color = encendido ? '#FF888F' : 'none';
+  var stroke = encendido ? '#FF888F' : '#b7b2ac';
+  if(escala === 'corazon'){
+    return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 21s-8-5.5-8-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-8 11-8 11z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  }
+  if(escala === 'like'){
+    return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M7 22V11l5-8 1.2.9-1 6.1H18a2 2 0 0 1 1.95 2.44l-1.4 7A2 2 0 0 1 16.6 21H7z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><rect x="3" y="11" width="4" height="11" rx="1" fill="'+(encendido?color:'none')+'" stroke="'+stroke+'" stroke-width="1.6"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.35.8.9.8 1.5V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1.2c0-.6.3-1.15.8-1.5A6.5 6.5 0 0 0 12 2.5z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/><line x1="9.5" y1="20.5" x2="14.5" y2="20.5" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="18.3" x2="14" y2="18.3" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/></svg>';
+}
+
+function renderLikertEstatico(escala, valorSeleccionado){
+  escala = escala || 'numeros';
+  var html = '<div class="likert-widget-static">';
+  for(var v=1; v<=5; v++){
+    if(escala === 'numeros'){
+      html += '<div class="likert-num-static' + (valorSeleccionado===v ? ' selected' : '') + '">' + v + '</div>';
+    } else {
+      html += iconoLikertHTML(escala, valorSeleccionado ? v <= valorSeleccionado : false);
+    }
+  }
+  html += '</div>';
+  return html;
 }
 
 function abrirDetalleParticipante(intentoId){
@@ -465,6 +525,10 @@ function abrirDetalleParticipante(intentoId){
       if(r.retroalimentacion){
         html += '<div class="detail-feedback">&#128172; ' + r.retroalimentacion + '</div>';
       }
+    } else if(p.tipo === 'likert'){
+      var valorLikert = r.respuesta_texto ? parseInt(r.respuesta_texto) : null;
+      html += renderLikertEstatico(p.escala_tipo, valorLikert);
+      html += '<p style="margin-top:.6rem;font-size:.8rem;color:var(--gray)">Valor elegido: <strong>' + (valorLikert || '&#8212;') + ' / 5</strong> &middot; Puntaje: <strong>' + (r.puntaje_obtenido || 0) + ' / ' + p.peso + '</strong></p>';
     } else {
       var seleccionadas = G_seleccionadasPorRespuesta[r.id] || [];
       var opciones = G_opcionesPorPregunta[p.id] || [];
@@ -490,6 +554,89 @@ function abrirDetalleParticipante(intentoId){
 
 function cerrarDetalleParticipante(){
   document.getElementById('detailModal').style.display = 'none';
+}
+
+function preguntasOrdenadas(evaluacionId){
+  return (G_preguntasPorEvaluacion[evaluacionId] || []).slice().sort(function(a,b){ return a.orden - b.orden; });
+}
+
+function respuestaTextoPregunta(r, p){
+  if(!r) return '';
+  if(p.tipo === 'abierta') return r.respuesta_texto || '';
+  if(p.tipo === 'likert') return r.respuesta_texto ? (r.respuesta_texto + ' / 5') : '';
+  var seleccionadas = G_seleccionadasPorRespuesta[r.id] || [];
+  var opciones = G_opcionesPorPregunta[p.id] || [];
+  return opciones.filter(function(o){ return seleccionadas.indexOf(o.id) !== -1; }).map(function(o){ return o.texto; }).join('; ');
+}
+
+function encabezadosDetallado(evaluacionId){
+  var headers = ['Nombre','Correo','Fecha','Hora'];
+  preguntasOrdenadas(evaluacionId).forEach(function(p, idx){
+    var corto = p.enunciado.length > 50 ? p.enunciado.substring(0,50) + '...' : p.enunciado;
+    headers.push('P' + (idx+1) + ': ' + corto);
+    headers.push('P' + (idx+1) + ' - Puntaje');
+  });
+  headers.push('Puntaje Total');
+  headers.push('Estado');
+  return headers;
+}
+
+function filasParticipantesDetallado(asignacionId, evaluacionId){
+  var preguntas = preguntasOrdenadas(evaluacionId);
+  return (G_filtradosPorAsignacion[asignacionId] || []).map(function(i){
+    var fecha = new Date(i.enviado_en);
+    var fila = [i.nombre, i.correo, fecha.toLocaleDateString('es-CO'), fecha.toLocaleTimeString('es-CO')];
+    var respuestasIntento = G_respuestasPorIntento[i.id] || [];
+    preguntas.forEach(function(p){
+      var r = respuestasIntento.filter(function(x){ return x.pregunta_id === p.id; })[0];
+      fila.push(respuestaTextoPregunta(r, p));
+      fila.push(r && r.puntaje_obtenido !== null && r.puntaje_obtenido !== undefined ? r.puntaje_obtenido : '');
+    });
+    fila.push(i.puntaje_total !== null ? i.puntaje_total : '');
+    fila.push(i.estado === 'calificada' ? 'Calificada' : 'Pendiente');
+    return fila;
+  });
+}
+
+function exportarEvaluacionExcel(asignacionId, titulo){
+  var evaluacionId = G_evaluacionIdPorAsignacion[asignacionId];
+  gecaExportExcel(gecaSlug(titulo) + '.xlsx', titulo, encabezadosDetallado(evaluacionId), filasParticipantesDetallado(asignacionId, evaluacionId));
+}
+
+function exportarEvaluacionCSV(asignacionId, titulo){
+  var evaluacionId = G_evaluacionIdPorAsignacion[asignacionId];
+  gecaExportCSV(gecaSlug(titulo) + '.csv', encabezadosDetallado(evaluacionId), filasParticipantesDetallado(asignacionId, evaluacionId));
+}
+
+async function exportarEvaluacionPDF(asignacionId, titulo){
+  await gecaExportPDF(gecaSlug(titulo) + '.pdf', 'eval-sec-' + asignacionId, document.getElementById('btnPDF-' + asignacionId));
+}
+
+var CONSOLIDADO_HEADERS = ['Evaluación','Nombre','Correo','Fecha','Hora','Puntaje','Estado'];
+
+function filasConsolidado(){
+  var filas = [];
+  Object.keys(G_intentosPorAsignacion).forEach(function(aid){
+    var seccion = document.getElementById('eval-sec-' + aid);
+    var tituloEval = seccion ? seccion.querySelector('.month-title').textContent : '';
+    (G_intentosPorAsignacion[aid] || []).forEach(function(i){
+      var fecha = new Date(i.enviado_en);
+      filas.push([tituloEval, i.nombre, i.correo, fecha.toLocaleDateString('es-CO'), fecha.toLocaleTimeString('es-CO'), i.puntaje_total !== null ? i.puntaje_total : '', i.estado === 'calificada' ? 'Calificada' : 'Pendiente']);
+    });
+  });
+  return filas;
+}
+
+function exportarConsolidadoExcel(){
+  gecaExportExcel('consolidado_evaluaciones.xlsx', 'Consolidado', CONSOLIDADO_HEADERS, filasConsolidado());
+}
+
+function exportarConsolidadoCSV(){
+  gecaExportCSV('consolidado_evaluaciones.csv', CONSOLIDADO_HEADERS, filasConsolidado());
+}
+
+async function exportarConsolidadoPDF(){
+  await gecaExportPDF('consolidado_evaluaciones.pdf', 'evaluacionesContainer', document.getElementById('btnConsolidadoPDF'));
 }
 
 function cambiarTab(tab){

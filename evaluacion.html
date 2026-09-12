@@ -48,6 +48,12 @@ main{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
 .opciones-publicas{display:flex;flex-direction:column;gap:.6rem}
 .resp-abierta{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;font-family:'Open Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s;resize:vertical}
 .resp-abierta:focus{border-color:var(--pink)}
+.likert-widget{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
+.likert-num{width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:var(--white);color:var(--ink);font-weight:700;font-family:'Montserrat',sans-serif;font-size:1rem;cursor:pointer;transition:all .15s}
+.likert-num:hover{border-color:var(--pink)}
+.likert-num.selected{background:var(--pink);border-color:var(--pink);color:var(--white);transform:scale(1.08)}
+.likert-icon-btn{background:none;border:none;cursor:pointer;padding:.25rem;transition:transform .15s;line-height:0}
+.likert-icon-btn:hover{transform:scale(1.15)}
 .opcion-publica{display:flex;align-items:center;gap:.7rem;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:.75rem .9rem;font-size:.9rem;cursor:pointer;transition:border-color .2s}
 .opcion-publica:has(input:checked){border-color:var(--pink);background:rgba(255,136,143,.06)}
 .opcion-publica input{width:auto;flex-shrink:0}
@@ -138,6 +144,16 @@ async function cargarEvaluacion(){
   if(asigRes.error || !asigRes.data){ showError('Este enlace no es válido o la evaluación ya no está disponible.'); return; }
   asignacionActual = asigRes.data;
 
+  if(!asignacionActual.activa){ showError('Esta evaluación está pausada temporalmente. Intenta más tarde o contacta a GECA Creativo.'); return; }
+  if(asignacionActual.fecha_apertura && new Date() < new Date(asignacionActual.fecha_apertura)){
+    showError('Esta evaluación aún no está habilitada. Estará disponible a partir del ' + new Date(asignacionActual.fecha_apertura).toLocaleString('es-CO') + '.');
+    return;
+  }
+  if(asignacionActual.fecha_cierre && new Date() > new Date(asignacionActual.fecha_cierre)){
+    showError('Esta evaluación ya cerró (' + new Date(asignacionActual.fecha_cierre).toLocaleString('es-CO') + ') y no acepta más respuestas.');
+    return;
+  }
+
   var pregRes = await sb.from('evaluacion_publica_preguntas').select('*').eq('evaluacion_id', asignacionActual.evaluacion_id).order('orden');
   preguntasActuales = pregRes.data || [];
 
@@ -188,6 +204,51 @@ function comenzar(){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+var likertValores = {};
+
+function iconoLikertHTML(escala, encendido){
+  var color = encendido ? '#FF888F' : 'none';
+  var stroke = encendido ? '#FF888F' : '#b7b2ac';
+  if(escala === 'corazon'){
+    return '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 21s-8-5.5-8-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-8 11-8 11z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  }
+  if(escala === 'like'){
+    return '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M7 22V11l5-8 1.2.9-1 6.1H18a2 2 0 0 1 1.95 2.44l-1.4 7A2 2 0 0 1 16.6 21H7z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><rect x="3" y="11" width="4" height="11" rx="1" fill="'+(encendido?color:'none')+'" stroke="'+stroke+'" stroke-width="1.6"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.35.8.9.8 1.5V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1.2c0-.6.3-1.15.8-1.5A6.5 6.5 0 0 0 12 2.5z" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round"/><line x1="9.5" y1="20.5" x2="14.5" y2="20.5" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="18.3" x2="14" y2="18.3" stroke="'+stroke+'" stroke-width="1.6" stroke-linecap="round"/></svg>';
+}
+
+function renderLikertWidget(p){
+  var escala = p.escala_tipo || 'numeros';
+  var html = '<div class="likert-widget" data-pregunta="' + p.id + '" data-escala="' + escala + '">';
+  for(var v=1; v<=5; v++){
+    if(escala === 'numeros'){
+      html += '<button type="button" class="likert-num" data-valor="' + v + '" onclick="seleccionarLikert(\'' + p.id + '\',' + v + ')">' + v + '</button>';
+    } else {
+      html += '<button type="button" class="likert-icon-btn" data-valor="' + v + '" onclick="seleccionarLikert(\'' + p.id + '\',' + v + ')">' + iconoLikertHTML(escala, false) + '</button>';
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+function seleccionarLikert(preguntaId, valor){
+  likertValores[preguntaId] = valor;
+  var widget = document.querySelector('.likert-widget[data-pregunta="' + preguntaId + '"]');
+  if(!widget) return;
+  var escala = widget.dataset.escala;
+  if(escala === 'numeros'){
+    widget.querySelectorAll('.likert-num').forEach(function(btn){
+      btn.classList.toggle('selected', parseInt(btn.dataset.valor) === valor);
+    });
+  } else {
+    widget.querySelectorAll('.likert-icon-btn').forEach(function(btn){
+      var v = parseInt(btn.dataset.valor);
+      btn.innerHTML = iconoLikertHTML(escala, v <= valor);
+    });
+  }
+}
+
 function renderPreguntas(){
   var cont = document.getElementById('preguntasEval');
   var html = '';
@@ -197,6 +258,8 @@ function renderPreguntas(){
     html += '<div class="preg-enunciado">' + p.enunciado + '</div>';
     if(p.tipo === 'abierta'){
       html += '<textarea class="resp-abierta" data-pregunta="' + p.id + '" rows="3" placeholder="Escribe tu respuesta..."></textarea>';
+    } else if(p.tipo === 'likert'){
+      html += renderLikertWidget(p);
     } else {
       html += '<div class="opciones-publicas">';
       p.opciones.forEach(function(o){
@@ -219,6 +282,10 @@ async function enviarRespuestas(){
       var val = document.querySelector('.resp-abierta[data-pregunta="' + p.id + '"]').value.trim();
       if(!val) incompleta = true;
       respuestas.push({pregunta_id:p.id, respuesta_texto:val});
+    } else if(p.tipo === 'likert'){
+      var valorLikert = likertValores[p.id];
+      if(!valorLikert) incompleta = true;
+      respuestas.push({pregunta_id:p.id, valor: valorLikert || null});
     } else {
       var checks = document.querySelectorAll('input[name="preg-' + p.id + '"]:checked');
       if(checks.length === 0) incompleta = true;
