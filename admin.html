@@ -1099,6 +1099,15 @@ function actualizarPesoTotal(){
 }
 
 async function guardarEvaluacion(){
+  try{
+    await guardarEvaluacionInterna();
+  } catch(err){
+    console.error('Error inesperado al guardar la evaluación:', err);
+    toast('Error inesperado al guardar: ' + err.message + ' (revisa la consola con F12 para más detalle)', 'error');
+  }
+}
+
+async function guardarEvaluacionInterna(){
   syncBuilderFromDOM();
   var titulo = document.getElementById('ev-titulo').value.trim();
   var descripcion = document.getElementById('ev-descripcion').value.trim();
@@ -1135,7 +1144,7 @@ async function guardarEvaluacion(){
   var idsABorrar = preguntasOriginalesIds.filter(function(id){ return idsActuales.indexOf(id) === -1; });
   if(idsABorrar.length > 0){
     var msg = 'Vas a eliminar ' + idsABorrar.length + ' pregunta' + (idsABorrar.length===1?'':'s') + '. Si ya hay respuestas registradas para ' + (idsABorrar.length===1?'esa pregunta':'esas preguntas') + ', se perderán junto con su calificación. ¿Continuar?';
-    if(!confirm(msg)) return;
+    if(!confirm(msg)){ toast('Guardado cancelado — no se hizo ningún cambio.'); return; }
   }
 
   var evalId = editingEvaluacionId;
@@ -1922,7 +1931,7 @@ function toast(msg, tipo){
   el.textContent=msg;
   el.className='toast'+(tipo==='error'?' error':'');
   el.classList.add('show');
-  setTimeout(function(){el.classList.remove('show')},3000);
+  setTimeout(function(){el.classList.remove('show')}, tipo==='error' ? 8000 : 3000);
 }
 
 // Enter para login
