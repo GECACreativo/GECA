@@ -62,6 +62,9 @@ main{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
 .success-box .icon{font-size:3rem;margin-bottom:1rem}
 .success-box h2{font-family:'Montserrat',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.6rem}
 .success-box p{color:var(--gray);font-size:.9rem}
+.success-puntaje{margin-top:1.8rem;padding-top:1.8rem;border-top:1px solid var(--border)}
+.success-puntaje .valor{font-family:'Montserrat',sans-serif;font-size:2.4rem;font-weight:900;color:var(--blue);line-height:1}
+.success-puntaje .label{font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-top:.4rem}
 </style>
 </head>
 <body>
@@ -120,6 +123,7 @@ main{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
         <div class="icon">&#9989;</div>
         <h2 id="successTitulo">¡Gracias!</h2>
         <p id="successMensaje">Tu evaluación fue enviada correctamente.</p>
+        <div class="success-puntaje" id="successPuntaje" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -318,6 +322,18 @@ async function enviarRespuestas(){
   if(asignacionActual.usar_mensaje_personalizado && asignacionActual.mensaje_personalizado){
     document.getElementById('successTitulo').textContent = '¡Listo!';
     document.getElementById('successMensaje').textContent = asignacionActual.mensaje_personalizado;
+  }
+
+  var resultado = r.data || {};
+  if(resultado.estado === 'calificada' && resultado.puntaje_total !== null && resultado.puntaje_total !== undefined){
+    var totalPosible = preguntasActuales.reduce(function(s, p){ return s + (p.peso || 0); }, 0);
+    var puntajeMostrado = Math.round(resultado.puntaje_total * 10) / 10;
+    var totalMostrado = Math.round(totalPosible * 10) / 10;
+    var pct = totalPosible > 0 ? Math.round((resultado.puntaje_total / totalPosible) * 100) : 0;
+    document.getElementById('successPuntaje').innerHTML =
+      '<div class="valor">' + puntajeMostrado + ' / ' + totalMostrado + '</div>' +
+      '<div class="label">Tu calificación &middot; ' + pct + '%</div>';
+    document.getElementById('successPuntaje').style.display = 'block';
   }
 
   document.getElementById('formStep').style.display = 'none';
