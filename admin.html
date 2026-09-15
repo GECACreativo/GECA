@@ -546,6 +546,12 @@ tr:hover td{background:rgba(0,60,126,.02)}
             </div>
           </div>
           <p style="font-size:.78rem;color:var(--gray);margin-top:-.5rem">Si dejas estos campos vac&#237;os, la evaluaci&#243;n estar&#225; disponible mientras est&#233; en estado "Publicada" y encendida, sin l&#237;mite de horario.</p>
+          <div class="fg">
+            <label style="display:flex;align-items:center;gap:.5rem;text-transform:none;font-size:.85rem">
+              <input type="checkbox" id="ev-permitir-reintentos" style="width:auto"/>
+              Permitir reintentos con el mismo correo (el env&#237;o m&#225;s reciente reemplaza al anterior)
+            </label>
+          </div>
         </div>
 
         <div class="card">
@@ -912,6 +918,7 @@ function nuevaEvaluacion(){
   toggleMensajePersonalizado();
   document.getElementById('ev-fecha-apertura').value = '';
   document.getElementById('ev-fecha-cierre').value = '';
+  document.getElementById('ev-permitir-reintentos').checked = false;
   document.getElementById('builderTitle').textContent = 'Nueva evaluación';
   showEvalView('builder');
   agregarPreguntaBuilder();
@@ -932,6 +939,7 @@ async function editarEvaluacion(id){
   toggleMensajePersonalizado();
   document.getElementById('ev-fecha-apertura').value = isoToDatetimeLocal(evalRes.data.fecha_apertura);
   document.getElementById('ev-fecha-cierre').value = isoToDatetimeLocal(evalRes.data.fecha_cierre);
+  document.getElementById('ev-permitir-reintentos').checked = evalRes.data.permitir_reintentos;
 
   var avisoRespuestas = evalRes.data.estado !== 'borrador';
 
@@ -1137,7 +1145,8 @@ async function guardarEvaluacionInterna(){
     builderPreguntas.forEach(function(p){ p.peso = pesoIgual; });
   }
 
-  var evalPayload = {titulo:titulo, descripcion:descripcion, estado:estado, ponderacion_automatica:ponderacionAuto, usar_mensaje_personalizado:usarMsgPersonalizado, mensaje_personalizado:usarMsgPersonalizado ? msgPersonalizado : null, fecha_apertura:datetimeLocalToISO(fechaAperturaVal), fecha_cierre:datetimeLocalToISO(fechaCierreVal)};
+  var permitirReintentos = document.getElementById('ev-permitir-reintentos').checked;
+  var evalPayload = {titulo:titulo, descripcion:descripcion, estado:estado, ponderacion_automatica:ponderacionAuto, usar_mensaje_personalizado:usarMsgPersonalizado, mensaje_personalizado:usarMsgPersonalizado ? msgPersonalizado : null, fecha_apertura:datetimeLocalToISO(fechaAperturaVal), fecha_cierre:datetimeLocalToISO(fechaCierreVal), permitir_reintentos:permitirReintentos};
 
   // Preguntas que ya no están en el constructor: si se borran, se pierden sus respuestas.
   var idsActuales = builderPreguntas.filter(function(p){ return p.id; }).map(function(p){ return p.id; });
@@ -1357,6 +1366,14 @@ var resultadosOpcionesPorPregunta = {};
 var resultadosSeleccionadasPorRespuesta = {};
 var detalleIntentoId = null;
 
+async function eliminarIntento(intentoId){
+  if(!confirm('¿Eliminar este intento presentado? Se borrará junto con sus respuestas y calificación. Esta acción no se puede deshacer.')) return;
+  var r = await sb.from('evaluacion_intentos').delete().eq('id', intentoId);
+  if(r.error){ toast('Error al eliminar: ' + r.error.message, 'error'); return; }
+  toast('Intento eliminado.');
+  cargarResultados();
+}
+
 async function abrirResultados(evalId, titulo){
   resultadosEvalId = evalId;
   document.getElementById('resultadosEvalTitulo').textContent = titulo;
@@ -1431,7 +1448,7 @@ async function cargarResultados(){
     html += '<tr><td>' + empresa + '</td><td><strong>' + i.nombre + '</strong></td><td class="td-email">' + i.correo + '</td>';
     html += '<td>' + (i.puntaje_total !== null ? i.puntaje_total : '<span style="color:var(--gray)">Pendiente</span>') + '</td>';
     html += '<td><span class="estado-badge ' + (i.estado === 'calificada' ? 'estado-publicada' : 'estado-borrador') + '">' + (i.estado === 'calificada' ? 'Calificada' : 'Pendiente') + '</span></td>';
-    html += '<td><button class="btn-edit" onclick="abrirDetalleIntento(\'' + i.id + '\')">Ver / Calificar</button></td></tr>';
+    html += '<td><button class="btn-edit" onclick="abrirDetalleIntento(\'' + i.id + '\')">Ver / Calificar</button><button class="btn-danger" onclick="eliminarIntento(\'' + i.id + '\')">Eliminar</button></td></tr>';
   });
   html += '</tbody></table></div>';
   cont.innerHTML = html;
